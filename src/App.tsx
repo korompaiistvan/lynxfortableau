@@ -1,15 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import FieldNode from "./FieldNode";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Very simple starter template that includes React, TypeScript and MaterialUI
-        </p>
-      </header>
+    <div>
+      <FieldNode
+        fieldRole="measure"
+        fieldName="Sales per Customer"
+        usedIn={["not much"]}
+        calculated={true}
+        syntax={"ugly calculation syntax"}
+      />
+      <FieldNode
+        fieldRole="dimension"
+        fieldName="Order ID"
+        usedIn={[
+          "almost",
+          "every single",
+          "chart",
+          "there is",
+          "even those with very long names",
+        ]}
+        calculated={false}
+        sourceTable={"Orders"}
+      />
     </div>
   );
 }
