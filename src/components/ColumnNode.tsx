@@ -9,28 +9,11 @@ import {
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { useState } from "react";
-import FieldRoleIndicator from "./FieldRoleIndicator";
+import ColumnRoleIndicator from "./ColumnRoleIndicator";
 
-import type { FieldRole } from "./types";
+import type { CalculatedColumn, SourceColumn } from "../types";
 
-interface FieldInfo {
-  fieldRole: FieldRole;
-  fieldName: string;
-  usedIn: string[];
-  calculated: boolean;
-}
-
-interface CalcProps extends FieldInfo {
-  calculated: true;
-  syntax: string;
-}
-
-interface SourceFieldProps extends FieldInfo {
-  calculated: false;
-  sourceTable: string;
-}
-
-function FieldNode<T extends CalcProps | SourceFieldProps>(props: T) {
+function ColumnNode<T extends CalculatedColumn | SourceColumn>(props: T) {
   const [expanded, setExpanded] = useState(false);
 
   function changeExpanded(event: any) {
@@ -47,8 +30,8 @@ function FieldNode<T extends CalcProps | SourceFieldProps>(props: T) {
       }}
     >
       <CardHeader
-        avatar={<FieldRoleIndicator fieldRole={props.fieldRole} />}
-        title={<Typography>{props.fieldName}</Typography>}
+        avatar={<ColumnRoleIndicator columnRole={props.role} />}
+        title={<Typography>{props.name}</Typography>}
         action={
           <IconButton>
             <ExpandMore
@@ -63,12 +46,12 @@ function FieldNode<T extends CalcProps | SourceFieldProps>(props: T) {
       <Collapse in={expanded}>
         <CardContent>
           {/* {props.calculated ? props.syntax : props.sourceTable} */}
-          {props.calculated && (
+          {props.isCalculated && (
             <Typography style={{ fontFamily: "JetBrains Mono" }}>
-              {props.syntax}
+              {props.calculation}
             </Typography>
           )}
-          {!props.calculated && (
+          {!props.isCalculated && (
             <Typography paragraph>
               <b>Source table:</b> {props.sourceTable}
             </Typography>
@@ -76,8 +59,8 @@ function FieldNode<T extends CalcProps | SourceFieldProps>(props: T) {
         </CardContent>
 
         <CardContent>
-          {props.usedIn.map((chartName) => {
-            return <Chip label={chartName} size="small" />;
+          {props.usedIn?.map((dep) => {
+            return <Chip label={dep.worksheet} size="small" />;
           })}
         </CardContent>
       </Collapse>
@@ -85,4 +68,4 @@ function FieldNode<T extends CalcProps | SourceFieldProps>(props: T) {
   );
 }
 
-export default FieldNode;
+export default ColumnNode;

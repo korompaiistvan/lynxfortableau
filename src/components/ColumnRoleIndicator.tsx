@@ -1,7 +1,7 @@
 import { SvgIcon } from "@material-ui/core";
-import type { FieldRole } from "./types";
+import type { ColumnRole } from "../types";
 interface Props {
-  fieldRole: FieldRole;
+  columnRole: ColumnRole;
 }
 
 const colorMapping = {
@@ -10,8 +10,8 @@ const colorMapping = {
   parameter: "purple",
 };
 
-function FieldRoleIndicator({ fieldRole }: Props) {
-  const color = colorMapping[fieldRole];
+function ColumnRoleIndicator({ columnRole }: Props) {
+  const color = colorMapping[columnRole];
   return (
     <SvgIcon fontSize="small">
       <circle cx="12" cy="12" r="5" fill={color} />
@@ -19,4 +19,4 @@ function FieldRoleIndicator({ fieldRole }: Props) {
   );
 }
 
-export default FieldRoleIndicator;
+export default ColumnRoleIndicator;
