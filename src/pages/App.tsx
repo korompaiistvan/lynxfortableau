@@ -23,7 +23,7 @@ function App() {
     <div>
       <div>
         {datasources.map((d) => (
-          <p>{JSON.stringify(d)}</p>
+          <p key={d.name}>{JSON.stringify(d)}</p>
         ))}
       </div>
     </div>

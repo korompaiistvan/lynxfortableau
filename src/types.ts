@@ -10,8 +10,9 @@ export interface Worksheet {
 
 export type Calculation = string;
 
-export interface Column {
+export interface _Column {
   name: string; // unique within the datasource
+  caption: string;
   role: ColumnRole;
   type: ColumnType;
   dataType: ColumnDataType;
@@ -27,31 +28,36 @@ export interface Column {
   dependencyGeneration?: number;
 }
 
-export interface CalculatedColumn extends Column {
+export interface CalculatedColumn extends _Column {
   isCalculated: true;
   isParameter: false;
   calculation: string;
   dependsOn: Array<Column["name"]>;
 }
 
-export interface SourceColumn extends Column {
+export interface SourceColumn extends _Column {
   isCalculated: false;
   isParameter: false;
   sourceTable: string;
   dependencyGeneration?: 0;
 }
 
-export interface Parameter extends Column {
+export interface Parameter extends _Column {
   isCalculated: false;
   isParameter: true;
-  dependencyGeneration: 0;
+  dependencyGeneration?: 0;
 }
+
+export type Column = Parameter | SourceColumn | CalculatedColumn;
 
 export interface Datasource {
   name: string;
   caption: string;
-  columns: Array<CalculatedColumn | SourceColumn>;
-  parameters?: Array<Parameter>;
+  columns: Column[];
+}
+
+export interface ParameterDatasource extends Datasource {
+  columns: Parameter[];
 }
 
 export interface Workbook {
