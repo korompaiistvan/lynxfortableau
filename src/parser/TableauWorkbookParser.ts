@@ -10,6 +10,11 @@ import {
   CalculatedColumn,
 } from "../types";
 
+/**
+ * Returns the datasources from a Tableau workbook string
+ * @param {string} xmlString - the Tableau workbook
+ * @returns {Datasource[]} An array of {@link Datasource} objects, extracted from the workbook string
+ */
 function getDatasourcesFromWorkbook(xmlString: string): Datasource[] {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -22,12 +27,20 @@ function getDatasourcesFromWorkbook(xmlString: string): Datasource[] {
   return datasources.map((ds) => convertElementToDatasource(xmlDoc, ds));
 }
 
+/**
+ * Evaluates an XPath expression and returns the result as an array
+ * @access private
+ * @param {Document} document - the document to run the expression on
+ * @param {string} xpath - the XPath expression to be evaluated
+ * @param {Node} [refNode=workbook] - the node relative to which the expression is evaluated
+ * @returns {Element[]} - An array of the resulting Element objects
+ */
 function _evaluateXPath(
-  workbook: Document,
+  document: Document,
   xpath: string,
-  refNode: Node = workbook
+  refNode: Node = document
 ): Array<Element> {
-  const iterator = workbook.evaluate(
+  const iterator = document.evaluate(
     xpath,
     refNode,
     null,
@@ -43,6 +56,12 @@ function _evaluateXPath(
   return resultNodes;
 }
 
+/**
+ * Takes an Element and attempts to parse it as a Tableau datasource.
+ * @param {Document} workbook - the workbook Document the Element is in. This is needed to
+ * @param {Element} element - the Element to convert
+ * @returns {Datasource} - a Datasource object
+ */
 function convertElementToDatasource(
   workbook: Document,
   element: Element
@@ -55,6 +74,12 @@ function convertElementToDatasource(
   };
 }
 
+/**
+ * Extracts the column information from a datasource
+ * @param {Document} workbook - the workbook that contains the datasource
+ * @param {Element} datasource - the datasource to extract the columns from
+ * @returns {Column[]} - an array of {@link Column}s
+ */
 function getColumnsFromDatasourceElement(
   workbook: Document,
   datasource: Element
@@ -90,6 +115,12 @@ function getColumnsFromDatasourceElement(
   return [];
 }
 
+/**
+ * Converts the input element to a parameter
+ * @param {Document} workbook - the workbook the Column element is in
+ * @param {Element} element - the element holding the column information
+ * @returns {Parameter} the parameter object
+ */
 function convertElementToParameter(
   workbook: Document,
   element: Element
@@ -111,6 +142,12 @@ function convertElementToParameter(
   };
 }
 
+/**
+ * Converts the input element to a Calculated Column
+ * @param {Document} workbook - the workbook the Column element is in
+ * @param {Element} element - the element holding the column information
+ * @returns {CalculatedColumn} a CalculatedColumn object
+ */
 function convertElementToCalculatedColumn(
   workbook: Document,
   element: Element
@@ -140,6 +177,12 @@ function convertElementToCalculatedColumn(
   };
 }
 
+/**
+ * Converts the input element to a source column (non-calculated)
+ * @param {Document} workbook - the workbook the Column element is in
+ * @param {Element} element - the element holding the column information
+ * @returns {SourceColumn} a SourceColumn object
+ */
 function convertElementToSourceColumn(
   workbook: Document,
   element: Element
@@ -165,16 +208,11 @@ function convertElementToSourceColumn(
     "./column",
     datasourceElement
   );
-  console.log(sourceTable);
-  console.log(element);
-  console.log(datasourceElement);
-  console.log(otherColumnElement);
 
   // /workbook/datasources/datasource/connection//column//ancestor::datasource/column[@name='\[City\]']
   try {
     const role = otherColumnElement.getAttribute("role") as ColumnRole;
   } catch (error) {
-    console.log(name);
     throw error;
   }
   const type = otherColumnElement.getAttribute("type") as ColumnType;
