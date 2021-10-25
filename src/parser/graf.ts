@@ -50,21 +50,21 @@ class Graph {
   }
 
   outDegree(vertex: Vertex) {
-    return this.edges.filter((e) => (e.from = vertex.id)).length;
+    return this.edges.filter((e) => e.from === vertex.id).length;
   }
 
   inDegree(vertex: Vertex) {
-    return this.edges.filter((e) => (e.to = vertex.id)).length;
+    return this.edges.filter((e) => e.to === vertex.id).length;
   }
 
   children(vertex: Vertex | Vertex["id"]): Vertex[] {
     if (typeof vertex === "string") {
       return this.edges
-        .filter((e) => (e.from = vertex))
+        .filter((e) => e.from === vertex)
         .map((e) => this.getVertex(e.to));
     } else {
       return this.edges
-        .filter((e) => (e.from = vertex.id))
+        .filter((e) => e.from === vertex.id)
         .map((e) => this.getVertex(e.to));
     }
   }
@@ -98,10 +98,10 @@ class Graph {
         }
       }
 
-      currentGeneration.forEach(
-        (vertexId) =>
-          (this.getVertex(vertexId).topologicalGeneration = generationIdx)
-      );
+      currentGeneration.forEach((vertexId) => {
+        const vertex = this.getVertex(vertexId);
+        vertex.topologicalGeneration = generationIdx;
+      });
       generationIdx++;
     }
   }

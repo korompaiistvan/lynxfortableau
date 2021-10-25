@@ -205,6 +205,7 @@ function stripJunkFromCalc(calculation: string): string {
 
 function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
+  let graph = new Graph();
   for (let column of datasource.columns) {
     if (column.isCalculated) {
       const calcSyntax = stripJunkFromCalc(column.calculation);
@@ -212,13 +213,13 @@ function populateColumnDependencies(datasource: Datasource): MappedDatasource {
         .filter((c) => calcSyntax.includes(c.name))
         .map((c) => c.name);
       mappedColumns.push({ ...column, dependsOn, dependencyGeneration: 0 });
+    } else {
+      mappedColumns.push({ ...column, dependsOn: [], dependencyGeneration: 0 });
     }
-    mappedColumns.push({ ...column, dependsOn: [], dependencyGeneration: 0 });
+    graph.addVertex({ id: column.name });
   }
 
-  let graph = new Graph();
   for (let column of mappedColumns) {
-    graph.addVertex({ id: column.name });
     column.dependsOn.forEach((d) => {
       graph.addEdge({ from: d, to: column.name });
     });
@@ -235,4 +236,4 @@ function populateColumnDependencies(datasource: Datasource): MappedDatasource {
     columns: mappedColumns,
   };
 }
-export { getDatasourcesFromWorkbook };
+export { getDatasourcesFromWorkbook, populateColumnDependencies };
