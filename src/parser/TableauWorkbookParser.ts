@@ -2,9 +2,6 @@ import {
   Column,
   Datasource,
   Workbook,
-  ColumnRole,
-  ColumnType,
-  ColumnDataType,
   Parameter,
   SourceColumn,
   CalculatedColumn,
@@ -70,6 +67,7 @@ function convertElementToDatasource(
   return {
     name: element.getAttribute("name")!,
     caption: element.getAttribute("caption")!,
+    isColumnDependencyMapped: false,
     columns: cols,
   };
 }
@@ -112,7 +110,7 @@ function getColumnsFromDatasourceElement(
   let columns: Array<Column> = [];
   columns = columns.concat(calculatedColumns, parameterColumns, sourceColumns);
 
-  return [];
+  return columns;
 }
 
 /**
@@ -127,15 +125,9 @@ function convertElementToParameter(
 ): Parameter {
   const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
-  const role = element.getAttribute("role")! as ColumnRole;
-  const dataType = element.getAttribute("datatype")! as ColumnDataType;
-  const type = element.getAttribute("type")! as ColumnType;
 
   return {
     name,
-    role,
-    dataType,
-    type,
     caption,
     isParameter: true,
     isCalculated: false,
@@ -154,9 +146,6 @@ function convertElementToCalculatedColumn(
 ): CalculatedColumn {
   const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
-  const role = element.getAttribute("role")! as ColumnRole;
-  const dataType = element.getAttribute("datatype")! as ColumnDataType;
-  const type = element.getAttribute("type")! as ColumnType;
 
   const calculation = _evaluateXPath(
     workbook,
@@ -166,14 +155,10 @@ function convertElementToCalculatedColumn(
 
   return {
     name,
-    caption: "string",
-    role: role,
-    type: type,
-    dataType: dataType,
+    caption,
     calculation,
     isCalculated: true,
     isParameter: false,
-    dependsOn: [],
   };
 }
 
@@ -189,46 +174,20 @@ function convertElementToSourceColumn(
 ): SourceColumn {
   // attributes on the column element within the connection element
   const name = element.getAttribute("name")!;
-  const dataType = element.getAttribute("datatype")! as ColumnDataType;
   const sourceTable = _evaluateXPath(
     workbook,
     "../..",
     element
   )[0].getAttribute("name")!;
 
-  // attributes only found on the column element that's the child of the datasource
-  const datasourceElement = _evaluateXPath(
-    workbook,
-    ".//ancestor::datasource",
-    element
-  )[0];
-
-  const otherColumnElement = _evaluateXPath(
-    workbook,
-    "./column",
-    datasourceElement
-  );
-
-  // /workbook/datasources/datasource/connection//column//ancestor::datasource/column[@name='\[City\]']
-  try {
-    const role = otherColumnElement.getAttribute("role") as ColumnRole;
-  } catch (error) {
-    throw error;
-  }
-  const type = otherColumnElement.getAttribute("type") as ColumnType;
-
   return {
     name,
     caption: "string",
-    role,
-    type,
-    dataType,
-
     isCalculated: false,
     isParameter: false,
-
     sourceTable,
   };
 }
 
+function populateColumnDependencies(datasource: Datasource) {}
 export { getDatasourcesFromWorkbook };

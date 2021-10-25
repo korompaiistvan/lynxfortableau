@@ -1,7 +1,3 @@
-export type ColumnRole = "measure" | "dimension";
-export type ColumnType = "quantitative" | "nominal";
-export type ColumnDataType = "real" | "integer" | "string";
-
 export interface Worksheet {
   name: string; // unique between sheets
   //   primaryDataSource: Datasource["name"];
@@ -10,50 +6,49 @@ export interface Worksheet {
 
 export type Calculation = string;
 
-export interface _Column {
+export interface BaseColumn {
   name: string; // unique within the datasource
   caption: string;
-  role: ColumnRole;
-  type: ColumnType;
-  dataType: ColumnDataType;
 
   isCalculated: boolean;
   isParameter: boolean;
-
-  usedIn?: Array<{
-    worksheet: Worksheet["name"];
-    asFilter: boolean;
-  }>;
-
-  dependencyGeneration?: number;
 }
 
-export interface CalculatedColumn extends _Column {
+export interface CalculatedColumn extends BaseColumn {
   isCalculated: true;
   isParameter: false;
   calculation: string;
-  dependsOn: Array<Column["name"]>;
 }
 
-export interface SourceColumn extends _Column {
+export interface SourceColumn extends BaseColumn {
   isCalculated: false;
   isParameter: false;
   sourceTable: string;
   dependencyGeneration?: 0;
 }
 
-export interface Parameter extends _Column {
+export interface Parameter extends BaseColumn {
   isCalculated: false;
   isParameter: true;
   dependencyGeneration?: 0;
 }
 
 export type Column = Parameter | SourceColumn | CalculatedColumn;
+export type MappedColumn = Column & {
+  dependsOn: Array<Column["name"]>;
+  dependencyGeneration: number;
+};
 
 export interface Datasource {
   name: string;
   caption: string;
+  isColumnDependencyMapped: boolean;
   columns: Column[];
+}
+
+export interface MappedDatasource extends Datasource {
+  isColumnDependencyMapped: true;
+  columns: MappedColumn[];
 }
 
 export interface ParameterDatasource extends Datasource {
