@@ -5,7 +5,10 @@ import {
   Parameter,
   SourceColumn,
   CalculatedColumn,
+  MappedDatasource,
+  MappedColumn,
 } from "../types";
+import { Graph } from "./graf";
 
 /**
  * Returns the datasources from a Tableau workbook string
@@ -189,5 +192,47 @@ function convertElementToSourceColumn(
   };
 }
 
-function populateColumnDependencies(datasource: Datasource) {}
+function stripJunkFromCalc(calculation: string): string {
+  // first strip string literals
+  let cleanCalc = calculation.replaceAll(/".*?"/gs, "");
+  // then strip comments, starting with `//`
+  cleanCalc = cleanCalc.replaceAll(/\/\/.*/g, "");
+  // as well as multiline comments starting with /* and ending with */
+  cleanCalc = cleanCalc.replaceAll(/\/\*.*\*\//gs, "");
+
+  return cleanCalc;
+}
+
+function populateColumnDependencies(datasource: Datasource): MappedDatasource {
+  let mappedColumns: MappedColumn[] = [];
+  for (let column of datasource.columns) {
+    if (column.isCalculated) {
+      const calcSyntax = stripJunkFromCalc(column.calculation);
+      const dependsOn = datasource.columns
+        .filter((c) => calcSyntax.includes(c.name))
+        .map((c) => c.name);
+      mappedColumns.push({ ...column, dependsOn, dependencyGeneration: 0 });
+    }
+    mappedColumns.push({ ...column, dependsOn: [], dependencyGeneration: 0 });
+  }
+
+  let graph = new Graph();
+  for (let column of mappedColumns) {
+    graph.addVertex({ id: column.name });
+    column.dependsOn.forEach((d) => {
+      graph.addEdge({ from: d, to: column.name });
+    });
+  }
+  graph.getTopologicalGenerations();
+  graph.vertices.forEach((v) => {
+    mappedColumns.filter((c) => c.name == v.id)[0].dependencyGeneration =
+      v.topologicalGeneration!;
+  });
+
+  return {
+    ...datasource,
+    isColumnDependencyMapped: true,
+    columns: mappedColumns,
+  };
+}
 export { getDatasourcesFromWorkbook };
