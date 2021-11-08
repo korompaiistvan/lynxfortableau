@@ -5,15 +5,13 @@ import {
   Typography,
   CardHeader,
   IconButton,
-  Chip,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { useState } from "react";
-import ColumnRoleIndicator from "./ColumnRoleIndicator";
 
-import type { CalculatedColumn, SourceColumn } from "../types";
+import type { Column } from "../types";
 
-function ColumnNode<T extends CalculatedColumn | SourceColumn>(props: T) {
+function ColumnNode(props: Column) {
   const [expanded, setExpanded] = useState(false);
 
   function changeExpanded(event: any) {
@@ -30,8 +28,7 @@ function ColumnNode<T extends CalculatedColumn | SourceColumn>(props: T) {
       }}
     >
       <CardHeader
-        avatar={<ColumnRoleIndicator columnRole={props.role} />}
-        title={<Typography>{props.name}</Typography>}
+        title={<Typography>{props.caption}</Typography>}
         action={
           <IconButton>
             <ExpandMore
@@ -48,20 +45,25 @@ function ColumnNode<T extends CalculatedColumn | SourceColumn>(props: T) {
           {/* {props.calculated ? props.syntax : props.sourceTable} */}
           {props.isCalculated && (
             <Typography style={{ fontFamily: "JetBrains Mono" }}>
-              {props.calculation}
+              <b>Calculation</b> {props.calculation}
             </Typography>
           )}
-          {!props.isCalculated && (
+          {!props.isCalculated && !props.isParameter && (
             <Typography paragraph>
               <b>Source table:</b> {props.sourceTable}
             </Typography>
           )}
+          {props.isParameter && (
+            <Typography paragraph>
+              <b>Parameter</b>
+            </Typography>
+          )}
         </CardContent>
-
         <CardContent>
-          {props.usedIn?.map((dep) => {
-            return <Chip label={dep.worksheet} size="small" />;
-          })}
+          <h4>Raw form</h4>
+          <code>
+            <pre>{JSON.stringify(props, null, "\t")}</pre>
+          </code>
         </CardContent>
       </Collapse>
     </Card>
