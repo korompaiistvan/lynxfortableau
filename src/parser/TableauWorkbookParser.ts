@@ -86,17 +86,15 @@ function getColumnsFromDatasourceElement(
   datasource: Element
 ): Array<Column> {
   const dsIsParameters = datasource.getAttribute("name") == "Parameters";
-  const calculatedColumnElements = _evaluateXPath(
-    workbook,
-    "./column[calculation]",
-    datasource
-  );
+  const calculatedColumnElements = dsIsParameters
+    ? []
+    : _evaluateXPath(workbook, "./column[calculation]", datasource);
   const parameterColumnElements = dsIsParameters
     ? _evaluateXPath(workbook, "./column", datasource)
     : [];
   const sourceColumnElements = _evaluateXPath(
     workbook,
-    "./connection//column",
+    "./column[not(calculation)]",
     datasource
   );
 
@@ -175,17 +173,29 @@ function convertElementToSourceColumn(
   workbook: Document,
   element: Element
 ): SourceColumn {
-  // attributes on the column element within the connection element
   const name = element.getAttribute("name")!;
+  // find the metadata record in the datasource
+  const datasource = _evaluateXPath(
+    workbook,
+    "ancestor::datasource",
+    element
+  )[0];
+
+  const metadataRecord = _evaluateXPath(
+    workbook,
+    "./connection/metadata-records/metadata-record[@class='column' and local-name[text()='[Category]']]",
+    datasource
+  )[0];
+
   const sourceTable = _evaluateXPath(
     workbook,
-    "../..",
-    element
-  )[0].getAttribute("name")!;
+    "./parent-name",
+    metadataRecord
+  )[0].textContent!;
 
   return {
     name,
-    caption: "string",
+    caption: name,
     isCalculated: false,
     isParameter: false,
     sourceTable,
