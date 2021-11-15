@@ -1,22 +1,23 @@
-import "./App.module.css";
 import { useState, useEffect, Fragment } from "react";
 import { MappedDatasource } from "../types";
 import { fetchSuperstore } from "../utils/fetchSuperstore";
-import ColumnNode from "../components/ColumnNode";
+import ColumnNode from "./ColumnNode";
+import { useRecoilState, atom } from "recoil";
+
+const datasourcesState = atom({
+  key: "datasources",
+  default: [] as Array<MappedDatasource>,
+});
 
 function App() {
-  const [datasources, setDatasources] = useState<Array<MappedDatasource>>([]);
+  const [datasources, setDatasources] = useRecoilState(datasourcesState);
 
   useEffect(() => {
     setDatasources(fetchSuperstore());
   }, []);
 
   return (
-    <svg viewBox="0 0 2000 2000">
-      <g fill="white" stroke="green" strokeWidth="5">
-        <circle cx="40" cy="40" r="25" />
-        <circle cx="60" cy="60" r="25" />
-      </g>
+    <svg viewBox="0 0 1500 2000">
       {datasources.map((datasource, idx) => {
         return (
           <g
@@ -31,8 +32,9 @@ function App() {
                   key={col.name}
                   y={`${idx * 200}`}
                   x="0"
-                  width="320"
-                  height="300"
+                  width="1"
+                  height="1"
+                  style={{ overflow: "visible" }}
                 >
                   <ColumnNode {...col} />
                 </foreignObject>
