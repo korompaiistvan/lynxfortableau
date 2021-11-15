@@ -7,16 +7,27 @@ import {
   IconButton,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import type { Column } from "../types";
 
 function ColumnNode(props: Column) {
   const [expanded, setExpanded] = useState(false);
+  const [dimensions, setDimensions] = useState([0, 0]);
+  const selfRef = useRef<HTMLElement>(null);
 
   function changeExpanded(event: any) {
     setExpanded((e) => !e);
   }
+
+  function updateDimensions() {
+    if (!selfRef.current) return;
+    setDimensions([selfRef.current.offsetWidth, selfRef.current.offsetHeight]);
+  }
+
+  useEffect(() => {
+    updateDimensions();
+  }, []);
 
   return (
     <Card
@@ -25,7 +36,9 @@ function ColumnNode(props: Column) {
       style={{
         maxWidth: expanded ? "400px" : "260px",
         transition: "max-width 0.5s",
+        minWidth: "260px",
       }}
+      ref={selfRef}
     >
       <CardHeader
         title={<Typography>{props.caption}</Typography>}
@@ -40,7 +53,11 @@ function ColumnNode(props: Column) {
           </IconButton>
         }
       />
-      <Collapse in={expanded}>
+      <Collapse
+        in={expanded}
+        onEntered={updateDimensions}
+        onExited={updateDimensions}
+      >
         <CardContent>
           {/* {props.calculated ? props.syntax : props.sourceTable} */}
           {props.isCalculated && (
@@ -60,9 +77,9 @@ function ColumnNode(props: Column) {
           )}
         </CardContent>
         <CardContent>
-          <h4>Raw form</h4>
+          <h4>Dimensions</h4>
           <code>
-            <pre>{JSON.stringify(props, null, "\t")}</pre>
+            <pre>{JSON.stringify(dimensions)}</pre>
           </code>
         </CardContent>
       </Collapse>
