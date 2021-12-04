@@ -2,46 +2,70 @@ import { useState, useEffect, Fragment } from "react";
 import { MappedDatasource } from "../types";
 import { fetchSuperstore } from "../utils/fetchSuperstore";
 import ColumnNode from "./ColumnNode";
-import { useRecoilState, atom } from "recoil";
+import {
+  useRecoilState,
+  atom,
+  useSetRecoilState,
+  useRecoilValue,
+  useRecoilCallback,
+} from "recoil";
+import {
+  nodesStateFamily,
+  linksState,
+  nodeIdsState,
+  nodeState,
+  // nodesSelectorFamily
+} from "../utils/state";
+import type { link } from "../utils/state";
 
-const datasourcesState = atom({
-  key: "datasources",
-  default: [] as Array<MappedDatasource>,
-});
+function initializeApp() {
+  const datasources = fetchSuperstore();
+  const superstoreDs = datasources[2];
+}
 
 function App() {
-  const [datasources, setDatasources] = useRecoilState(datasourcesState);
+  const [links, setLinks] = useRecoilState(linksState);
+  const [isInitialized, setIsInitialized] = useState(false);
+  // const [nodes, setNodes] = useRecoilState(nodesStateFamily);
+  const nodeIds = useRecoilValue(nodeIdsState);
+  const createNode = useRecoilCallback(
+    ({ set }) =>
+      (nodeId: string, nodeState) => {
+        set(nodeIdsState, (currVal) => [...currVal, nodeId as string]);
+        set(nodesStateFamily(nodeId), nodeState as nodeState);
+      },
+    []
+  );
 
   useEffect(() => {
-    setDatasources(fetchSuperstore());
+    if (isInitialized) {
+      return;
+    }
+    const datasources = fetchSuperstore();
+    const superstoreDs = datasources[2];
+    let links: link[] = [];
+    superstoreDs.columns.forEach((col, idx) => {
+      createNode(col.name, {
+        colIdx: col.dependencyGeneration,
+        isClosed: true,
+        openHeight: 50,
+        yIdx: idx,
+        data: col,
+      });
+
+      if (col.isCalculated) {
+        const newLinks = col.dependsOn.map((d) => [d, col.name] as link);
+        links = links.concat(newLinks);
+      }
+    });
+    setLinks(links);
+    setIsInitialized(true);
   }, []);
 
   return (
-    <svg viewBox="0 0 1500 2000">
-      {datasources.map((datasource, idx) => {
-        return (
-          <g
-            key={datasource.name}
-            className="boardColumn"
-            transform={`translate(${idx * 320}, 0)`}
-            width="320"
-          >
-            {datasource.columns.map((col, idx) => {
-              return (
-                <foreignObject
-                  key={col.name}
-                  y={`${idx * 200}`}
-                  x="0"
-                  width="1"
-                  height="1"
-                  style={{ overflow: "visible" }}
-                >
-                  <ColumnNode {...col} />
-                </foreignObject>
-              );
-            })}
-          </g>
-        );
+    <svg viewBox="0 0 1500 2000" width="1500px" height="2000px">
+      {nodeIds.map((nodeId, idx) => {
+        return <ColumnNode nodeId={nodeId} key={nodeId} />;
       })}
     </svg>
   );

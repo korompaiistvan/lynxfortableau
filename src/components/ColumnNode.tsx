@@ -8,82 +8,104 @@ import {
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { useState, useEffect, useRef } from "react";
+import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 
-import type { Column } from "../types";
+import {
+  Column,
+  isCalculatedColumn,
+  isParameterColumn,
+  isSourceColumn,
+} from "../types";
+import {
+  closedHeightState,
+  closedWidthState,
+  isClosedSelector,
+  nodesStateFamily,
+  openHeightSelector,
+  openWidthState,
+  xPositionSelector,
+  yPositionSelector,
+} from "../utils/state";
 
-function ColumnNode(props: Column) {
-  const [expanded, setExpanded] = useState(false);
-  const [dimensions, setDimensions] = useState([0, 0]);
+interface Props {
+  nodeId: Column["name"];
+}
+function ColumnNode(props: Props) {
+  const nodeState = useRecoilValue(nodesStateFamily(props.nodeId));
+  const setOpenHeight = useSetRecoilState(openHeightSelector(props.nodeId));
+  const openWidth = useRecoilValue(openWidthState);
+  const closedWidth = useRecoilValue(closedWidthState);
+  const closedHeight = useRecoilValue(closedHeightState);
+  const xPosition = useRecoilValue(xPositionSelector(props.nodeId));
+  const yPosition = useRecoilValue(yPositionSelector(props.nodeId));
+  const [isClosed, setIsClosed] = useRecoilState(
+    isClosedSelector(props.nodeId)
+  );
   const selfRef = useRef<HTMLElement>(null);
 
   function changeExpanded(event: any) {
-    setExpanded((e) => !e);
+    setIsClosed(!isClosed);
   }
 
-  function updateDimensions() {
+  function updateOpenHeight() {
     if (!selfRef.current) return;
-    setDimensions([selfRef.current.offsetWidth, selfRef.current.offsetHeight]);
+    if (isClosed) return;
+    setOpenHeight(selfRef.current.offsetHeight);
   }
-
-  useEffect(() => {
-    updateDimensions();
-  }, []);
 
   return (
-    <Card
-      className="node-component"
-      onClick={changeExpanded}
-      style={{
-        maxWidth: expanded ? "400px" : "260px",
-        transition: "max-width 0.5s",
-        minWidth: "260px",
-      }}
-      ref={selfRef}
+    <foreignObject
+      x={xPosition}
+      y={yPosition}
+      width="1"
+      height="1"
+      style={{ overflow: "visible", transition: "y 0.5s, x 0.5s" }}
     >
-      <CardHeader
-        title={<Typography>{props.caption}</Typography>}
-        action={
-          <IconButton>
-            <ExpandMore
-              style={{
-                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.5s",
-              }}
-            />
-          </IconButton>
-        }
-      />
-      <Collapse
-        in={expanded}
-        onEntered={updateDimensions}
-        onExited={updateDimensions}
+      <Card
+        className="node-component"
+        onClick={changeExpanded}
+        style={{
+          width: isClosed ? `${closedWidth}px` : `${openWidth}px`,
+          transition: "max-width 0.5s",
+          minHeight: `${closedHeight}px`,
+        }}
+        ref={selfRef}
       >
-        <CardContent>
-          {/* {props.calculated ? props.syntax : props.sourceTable} */}
-          {props.isCalculated && (
-            <Typography style={{ fontFamily: "JetBrains Mono" }}>
-              <b>Calculation</b> {props.calculation}
-            </Typography>
-          )}
-          {!props.isCalculated && !props.isParameter && (
-            <Typography paragraph>
-              <b>Source table:</b> {props.sourceTable}
-            </Typography>
-          )}
-          {props.isParameter && (
-            <Typography paragraph>
-              <b>Parameter</b>
-            </Typography>
-          )}
-        </CardContent>
-        <CardContent>
-          <h4>Dimensions</h4>
-          <code>
-            <pre>{JSON.stringify(dimensions)}</pre>
-          </code>
-        </CardContent>
-      </Collapse>
-    </Card>
+        <CardHeader
+          title={<Typography>{nodeState.data!.caption}</Typography>}
+          action={
+            <IconButton>
+              <ExpandMore
+                style={{
+                  transform: !isClosed ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.5s",
+                }}
+              />
+            </IconButton>
+          }
+        />
+        <Collapse in={!isClosed} onEntered={updateOpenHeight}>
+          <CardContent>
+            {/* {props.calculated ? props.syntax : props.sourceTable} */}
+            {isCalculatedColumn(nodeState.data!) && (
+              <Typography style={{ fontFamily: "JetBrains Mono" }}>
+                <b>Calculation</b> {nodeState.data.calculation}
+              </Typography>
+            )}
+            {isSourceColumn(nodeState.data!) && (
+              <Typography paragraph>
+                <b>Source table:</b> {nodeState.data.sourceTable}
+              </Typography>
+            )}
+            {isParameterColumn(nodeState.data!) && (
+              <Typography paragraph>
+                <b>Parameter</b>
+              </Typography>
+            )}
+          </CardContent>
+        </Collapse>
+      </Card>
+    </foreignObject>
   );
 }
 

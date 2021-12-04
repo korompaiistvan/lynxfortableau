@@ -10,13 +10,14 @@ import {
   constSelector,
   selector,
 } from "recoil";
-import { Column } from "../types";
+import { MappedColumn, Column } from "../types";
 
-interface nodeState {
+export interface nodeState {
   colIdx: number;
   isClosed: boolean;
   openHeight: number;
   yIdx: number;
+  data: undefined | MappedColumn;
 }
 export const nodesStateFamily = atomFamily<nodeState, string>({
   key: "nodes",
@@ -25,6 +26,7 @@ export const nodesStateFamily = atomFamily<nodeState, string>({
     isClosed: true,
     openHeight: 0,
     yIdx: -1,
+    data: undefined,
   },
 });
 
@@ -33,22 +35,41 @@ export const nodeIdsState = atom({
   default: [] as nodeId[],
 });
 
-export const createNode = useRecoilTransaction_UNSTABLE(
-  ({ get, set }) =>
-    (nodeId: string, nodeState?: nodeState) => {
-      if (get(nodeIdsState).includes(nodeId)) {
-        return errorSelector(
-          "the nodeId already exists, set the node directly"
-        );
-      }
+// export const nodesSelectorFamily = selectorFamily<nodeState, string>({
+//   key: "nodes-access",
+//   get:
+//     (nodeId) =>
+//     ({ get }) => {
+//       const atom = get(nodesStateFamily(nodeId));
+//       return atom;
+//     },
+//   set:
+//     (nodeId) =>
+//     ({ set, reset }, nodeState) => {
+//       if (guardRecoilDefaultValue(nodeState)) {
+//         return errorSelector("reset is not implemented yet");
+//       }
+//       set(nodesStateFamily(nodeId), nodeState);
+//       set(nodeIdsState, (prev) => [...prev, nodeId]);
+//     },
+// });
 
-      const newNode = nodesStateFamily(nodeId);
-      if (nodeState) {
-        set(newNode, nodeState);
-      }
-      set(nodeIdsState, (oldState) => [...oldState, nodeId]);
-    }
-);
+// export const createNode = useRecoilTransaction_UNSTABLE(
+//   ({ get, set }) =>
+//     (nodeId: string, nodeState?: nodeState) => {
+//       if (get(nodeIdsState).includes(nodeId)) {
+//         return errorSelector(
+//           "the nodeId already exists, set the node directly"
+//         );
+//       }
+
+//       const newNode = nodesStateFamily(nodeId);
+//       if (nodeState) {
+//         set(newNode, nodeState);
+//       }
+//       set(nodeIdsState, (oldState) => [...oldState, nodeId]);
+//     }
+// );
 
 type sortMode = "shortestLinks"; // later this will be a bit more options :D
 export const sortModeState = atom({
@@ -57,7 +78,7 @@ export const sortModeState = atom({
 });
 
 type nodeId = Column["name"];
-type link = [nodeId, nodeId];
+export type link = [nodeId, nodeId];
 export const linksState = atom({
   key: "links",
   default: [] as link[],
@@ -148,12 +169,13 @@ export const guardRecoilDefaultValue = (
   return false;
 };
 
-export const hGutterState = constSelector(60);
-export const vGutterState = constSelector(32);
+export const hGutterState = constSelector(260);
+export const marginState = constSelector(40);
+export const vGutterState = constSelector(40);
 
 export const openWidthState = constSelector(400);
 export const closedWidthState = constSelector(260);
-export const closedHeightState = constSelector(200);
+export const closedHeightState = constSelector(50);
 
 export const columnItemsSelector = selectorFamily({
   key: "columnItems",
@@ -174,7 +196,7 @@ export const columnWidthSelector = selectorFamily<number, number>({
       if (columnItems.length === 0) return 0;
 
       const openColumnItems = columnItems.filter(
-        (item) => !isClosedSelector(item)
+        (item) => !get(isClosedSelector(item))
       );
       if (openColumnItems.length > 0) {
         return get(openWidthState);
@@ -189,10 +211,12 @@ export const xPositionSelector = selectorFamily<number, string>({
     (nodeId: string) =>
     ({ get }) => {
       const colIdx = get(colIdxSelector(nodeId));
+      const margin = get(marginState);
       const hGutter = get(hGutterState);
-      let x = hGutter;
+      let x = margin;
       for (let i = 0; i < colIdx; i++) {
-        x += get(columnWidthSelector(i)) + hGutter;
+        const columnWidth = get(columnWidthSelector(i));
+        x += columnWidth + hGutter;
       }
       return x;
     },
@@ -209,6 +233,7 @@ export const yPositionSelector = selectorFamily<number, string>({
         (item) => get(yIdxSelector(item)) < yIdx
       );
       const vGutter = get(vGutterState);
+      const margin = get(marginState);
       const yPosition = aboveItems
         .map((n) =>
           get(isClosedSelector(n))
@@ -216,8 +241,8 @@ export const yPositionSelector = selectorFamily<number, string>({
             : get(openHeightSelector(n))
         )
         .reduce((prev, curr) => {
-          return prev + vGutter;
-        }, vGutter);
+          return prev + curr + vGutter;
+        }, margin);
       return yPosition;
     },
 });
