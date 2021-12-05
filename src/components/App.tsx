@@ -13,10 +13,11 @@ import {
   nodesStateFamily,
   linksState,
   nodeIdsState,
-  nodeState,
+  NodeState,
   // nodesSelectorFamily
 } from "../utils/state";
 import type { link } from "../utils/state";
+import NodeLink from "./NodeLink";
 
 function initializeApp() {
   const datasources = fetchSuperstore();
@@ -32,7 +33,7 @@ function App() {
     ({ set }) =>
       (nodeId: string, nodeState) => {
         set(nodeIdsState, (currVal) => [...currVal, nodeId as string]);
-        set(nodesStateFamily(nodeId), nodeState as nodeState);
+        set(nodesStateFamily(nodeId), nodeState as NodeState);
       },
     []
   );
@@ -64,6 +65,9 @@ function App() {
 
   return (
     <svg viewBox="0 0 1500 2000" width="1500px" height="2000px">
+      {links.map((link) => {
+        return <NodeLink start={link[0]} end={link[1]} />;
+      })}
       {nodeIds.map((nodeId, idx) => {
         return <ColumnNode nodeId={nodeId} key={nodeId} />;
       })}

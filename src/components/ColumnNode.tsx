@@ -25,6 +25,8 @@ import {
   openWidthState,
   xPositionSelector,
   yPositionSelector,
+  widthSelector,
+  highlightedNodeIdState,
 } from "../utils/state";
 
 interface Props {
@@ -36,8 +38,12 @@ function ColumnNode(props: Props) {
   const openWidth = useRecoilValue(openWidthState);
   const closedWidth = useRecoilValue(closedWidthState);
   const closedHeight = useRecoilValue(closedHeightState);
+  const width = useRecoilValue(widthSelector(props.nodeId));
   const xPosition = useRecoilValue(xPositionSelector(props.nodeId));
   const yPosition = useRecoilValue(yPositionSelector(props.nodeId));
+  const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(
+    highlightedNodeIdState
+  );
   const [isClosed, setIsClosed] = useRecoilState(
     isClosedSelector(props.nodeId)
   );
@@ -65,11 +71,13 @@ function ColumnNode(props: Props) {
         className="node-component"
         onClick={changeExpanded}
         style={{
-          width: isClosed ? `${closedWidth}px` : `${openWidth}px`,
-          transition: "max-width 0.5s",
+          width,
+          transition: "width 0.5s",
           minHeight: `${closedHeight}px`,
         }}
         ref={selfRef}
+        onMouseEnter={() => setHighlightedNodeId(props.nodeId)}
+        onMouseLeave={() => setHighlightedNodeId(undefined)}
       >
         <CardHeader
           title={<Typography>{nodeState.data!.caption}</Typography>}

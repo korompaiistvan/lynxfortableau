@@ -12,14 +12,14 @@ import {
 } from "recoil";
 import { MappedColumn, Column } from "../types";
 
-export interface nodeState {
+export interface NodeState {
   colIdx: number;
   isClosed: boolean;
   openHeight: number;
   yIdx: number;
   data: undefined | MappedColumn;
 }
-export const nodesStateFamily = atomFamily<nodeState, string>({
+export const nodesStateFamily = atomFamily<NodeState, NodeId>({
   key: "nodes",
   default: {
     colIdx: -1,
@@ -32,53 +32,17 @@ export const nodesStateFamily = atomFamily<nodeState, string>({
 
 export const nodeIdsState = atom({
   key: "nodeIds",
-  default: [] as nodeId[],
+  default: [] as NodeId[],
 });
 
-// export const nodesSelectorFamily = selectorFamily<nodeState, string>({
-//   key: "nodes-access",
-//   get:
-//     (nodeId) =>
-//     ({ get }) => {
-//       const atom = get(nodesStateFamily(nodeId));
-//       return atom;
-//     },
-//   set:
-//     (nodeId) =>
-//     ({ set, reset }, nodeState) => {
-//       if (guardRecoilDefaultValue(nodeState)) {
-//         return errorSelector("reset is not implemented yet");
-//       }
-//       set(nodesStateFamily(nodeId), nodeState);
-//       set(nodeIdsState, (prev) => [...prev, nodeId]);
-//     },
-// });
-
-// export const createNode = useRecoilTransaction_UNSTABLE(
-//   ({ get, set }) =>
-//     (nodeId: string, nodeState?: nodeState) => {
-//       if (get(nodeIdsState).includes(nodeId)) {
-//         return errorSelector(
-//           "the nodeId already exists, set the node directly"
-//         );
-//       }
-
-//       const newNode = nodesStateFamily(nodeId);
-//       if (nodeState) {
-//         set(newNode, nodeState);
-//       }
-//       set(nodeIdsState, (oldState) => [...oldState, nodeId]);
-//     }
-// );
-
-type sortMode = "shortestLinks"; // later this will be a bit more options :D
+type SortMode = "shortestLinks"; // later this will be a bit more options :D
 export const sortModeState = atom({
   key: "sortMode",
-  default: "shortestLinks" as sortMode,
+  default: "shortestLinks" as SortMode,
 });
 
-type nodeId = Column["name"];
-export type link = [nodeId, nodeId];
+type NodeId = Column["name"];
+export type link = [NodeId, NodeId];
 export const linksState = atom({
   key: "links",
   default: [] as link[],
@@ -87,7 +51,7 @@ export const linksState = atom({
 export const colIdxSelector = selectorFamily({
   key: "colIdx",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       return get(nodesStateFamily(nodeId)).colIdx;
     },
@@ -96,7 +60,7 @@ export const colIdxSelector = selectorFamily({
 export const yIdxSelector = selectorFamily({
   key: "yIdx",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       return get(nodesStateFamily(nodeId)).yIdx;
     },
@@ -105,12 +69,12 @@ export const yIdxSelector = selectorFamily({
 export const isClosedSelector = selectorFamily({
   key: "isClosed",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       return get(nodesStateFamily(nodeId)).isClosed;
     },
   set:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ set }, newClosedState) => {
       if (guardRecoilDefaultValue(newClosedState)) {
         return errorSelector("reset is not implemented on this selector");
@@ -127,15 +91,15 @@ export const isClosedSelector = selectorFamily({
     },
 });
 
-export const openHeightSelector = selectorFamily<number, string>({
+export const openHeightSelector = selectorFamily<number, NodeId>({
   key: "openHeight",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       return get(nodesStateFamily(nodeId)).openHeight;
     },
   set:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ set }, newOpenHeight) => {
       if (guardRecoilDefaultValue(newOpenHeight)) {
         return errorSelector("reset is not implemented on this selector");
@@ -205,10 +169,10 @@ export const columnWidthSelector = selectorFamily<number, number>({
     },
 });
 
-export const xPositionSelector = selectorFamily<number, string>({
+export const xPositionSelector = selectorFamily<number, NodeId>({
   key: "xPosition",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       const colIdx = get(colIdxSelector(nodeId));
       const margin = get(marginState);
@@ -222,10 +186,10 @@ export const xPositionSelector = selectorFamily<number, string>({
     },
 });
 
-export const yPositionSelector = selectorFamily<number, string>({
+export const yPositionSelector = selectorFamily<number, NodeId>({
   key: "yPosition",
   get:
-    (nodeId: string) =>
+    (nodeId: NodeId) =>
     ({ get }) => {
       const colIdx = get(colIdxSelector(nodeId));
       const yIdx = get(yIdxSelector(nodeId));
@@ -245,4 +209,31 @@ export const yPositionSelector = selectorFamily<number, string>({
         }, margin);
       return yPosition;
     },
+});
+
+export const widthSelector = selectorFamily({
+  key: "width",
+  get:
+    (nodeId: NodeId) =>
+    ({ get }) => {
+      return get(isClosedSelector(nodeId))
+        ? get(closedWidthState)
+        : get(openWidthState);
+    },
+});
+
+export const heightSelector = selectorFamily({
+  key: "height",
+  get:
+    (nodeId: NodeId) =>
+    ({ get }) => {
+      return get(isClosedSelector(nodeId))
+        ? get(closedHeightState)
+        : get(openHeightSelector(nodeId));
+    },
+});
+
+export const highlightedNodeIdState = atom<undefined | NodeId>({
+  key: "highlightedNode",
+  default: undefined,
 });
