@@ -15,6 +15,7 @@ import {
   isCalculatedColumn,
   isParameterColumn,
   isSourceColumn,
+  MappedColumn,
 } from "../types";
 import {
   closedHeightState,
@@ -29,24 +30,17 @@ import {
   highlightedNodeIdState,
 } from "../utils/state";
 
-interface Props {
-  nodeId: Column["name"];
-}
-function ColumnNode(props: Props) {
-  const nodeState = useRecoilValue(nodesStateFamily(props.nodeId));
-  const setOpenHeight = useSetRecoilState(openHeightSelector(props.nodeId));
-  const openWidth = useRecoilValue(openWidthState);
-  const closedWidth = useRecoilValue(closedWidthState);
+function ColumnNode(props: MappedColumn) {
+  const nodeId = props.name;
+  const setOpenHeight = useSetRecoilState(openHeightSelector(nodeId));
   const closedHeight = useRecoilValue(closedHeightState);
-  const width = useRecoilValue(widthSelector(props.nodeId));
-  const xPosition = useRecoilValue(xPositionSelector(props.nodeId));
-  const yPosition = useRecoilValue(yPositionSelector(props.nodeId));
+  const width = useRecoilValue(widthSelector(nodeId));
+  const xPosition = useRecoilValue(xPositionSelector(nodeId));
+  const yPosition = useRecoilValue(yPositionSelector(nodeId));
   const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(
     highlightedNodeIdState
   );
-  const [isClosed, setIsClosed] = useRecoilState(
-    isClosedSelector(props.nodeId)
-  );
+  const [isClosed, setIsClosed] = useRecoilState(isClosedSelector(nodeId));
   const selfRef = useRef<HTMLElement>(null);
 
   function changeExpanded(event: any) {
@@ -76,11 +70,11 @@ function ColumnNode(props: Props) {
           minHeight: `${closedHeight}px`,
         }}
         ref={selfRef}
-        onMouseEnter={() => setHighlightedNodeId(props.nodeId)}
+        onMouseEnter={() => setHighlightedNodeId(props.name)}
         onMouseLeave={() => setHighlightedNodeId(undefined)}
       >
         <CardHeader
-          title={<Typography>{nodeState.data!.caption}</Typography>}
+          title={<Typography>{props.caption}</Typography>}
           action={
             <IconButton>
               <ExpandMore
@@ -95,20 +89,20 @@ function ColumnNode(props: Props) {
         <Collapse in={!isClosed} onEntered={updateOpenHeight}>
           <CardContent>
             {/* {props.calculated ? props.syntax : props.sourceTable} */}
-            {isCalculatedColumn(nodeState.data!) && (
-              <Typography style={{ fontFamily: "JetBrains Mono" }}>
-                <b>Calculation</b>
-                <pre style={{ fontSize: "9pt" }}>
-                  <code>{nodeState.data.calculation}</code>
-                </pre>
-              </Typography>
+            {isCalculatedColumn(props) && (
+              <pre style={{ fontSize: "9pt" }}>
+                <Typography style={{ fontFamily: "JetBrains Mono" }}>
+                  <b>Calculation</b>
+                </Typography>
+                <code>{props.calculation}</code>
+              </pre>
             )}
-            {isSourceColumn(nodeState.data!) && (
+            {isSourceColumn(props) && (
               <Typography paragraph>
-                <b>Source table:</b> {nodeState.data.sourceTable}
+                <b>Source table:</b> {props.sourceTable}
               </Typography>
             )}
-            {isParameterColumn(nodeState.data!) && (
+            {isParameterColumn(props) && (
               <Typography paragraph>
                 <b>Parameter</b>
               </Typography>

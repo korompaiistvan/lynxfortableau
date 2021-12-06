@@ -1,72 +1,61 @@
-import { useState, useEffect, Fragment } from "react";
-import { MappedDatasource } from "../types";
-import { fetchSuperstore } from "../utils/fetchSuperstore";
+import { Fragment, useEffect } from "react";
 import ColumnNode from "./ColumnNode";
+import { useSetRecoilState, useRecoilValue } from "recoil";
+
 import {
-  useRecoilState,
-  atom,
-  useSetRecoilState,
-  useRecoilValue,
-  useRecoilCallback,
-} from "recoil";
-import {
-  nodesStateFamily,
   linksState,
-  nodeIdsState,
-  NodeState,
-  // nodesSelectorFamily
+  workbookStringState,
+  nodesStaticState,
 } from "../utils/state";
-import type { link } from "../utils/state";
 import NodeLink from "./NodeLink";
+import { AppBar, Toolbar, Typography, Button, Box } from "@material-ui/core";
 
 function App() {
-  const [links, setLinks] = useRecoilState(linksState);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const setWorkbookString = useSetRecoilState(workbookStringState);
+  const links = useRecoilValue(linksState);
+  // const [isInitialized, setIsInitialized] = useState(false);
   // const [nodes, setNodes] = useRecoilState(nodesStateFamily);
-  const nodeIds = useRecoilValue(nodeIdsState);
-  const createNode = useRecoilCallback(
-    ({ set }) =>
-      (nodeId: string, nodeState) => {
-        set(nodeIdsState, (currVal) => [...currVal, nodeId as string]);
-        set(nodesStateFamily(nodeId), nodeState as NodeState);
-      },
-    []
-  );
+  const nodes = useRecoilValue(nodesStaticState);
 
-  useEffect(() => {
-    if (isInitialized) {
-      return;
-    }
-    const datasources = fetchSuperstore();
-    const superstoreDs = datasources[2];
-    let links: link[] = [];
-    superstoreDs.columns.forEach((col, idx) => {
-      createNode(col.name, {
-        colIdx: col.dependencyGeneration,
-        isClosed: true,
-        openHeight: 50,
-        yIdx: idx,
-        data: col,
-      });
-
-      if (col.isCalculated) {
-        const newLinks = col.dependsOn.map((d) => [d, col.name] as link);
-        links = links.concat(newLinks);
-      }
+  function handleWorkbookChange(event: React.ChangeEvent<HTMLInputElement>) {
+    event.target.files![0].text().then((workbookString) => {
+      setWorkbookString(workbookString);
     });
-    setLinks(links);
-    setIsInitialized(true);
-  }, []);
+  }
 
   return (
-    <svg viewBox="0 0 1900 2000" width="1900px" height="2000px">
-      {links.map((link) => {
-        return <NodeLink start={link[0]} end={link[1]} />;
-      })}
-      {nodeIds.map((nodeId, idx) => {
-        return <ColumnNode nodeId={nodeId} key={nodeId} />;
-      })}
-    </svg>
+    <Fragment>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div">
+            Lynx for Tableau
+          </Typography>
+          <Box>
+            <input
+              accept=".twb"
+              hidden
+              id="raised-button-file"
+              multiple={false}
+              type="file"
+              onChange={handleWorkbookChange}
+            />
+            <label htmlFor="raised-button-file">
+              <Button variant="contained" size="small" component="span">
+                Upload
+              </Button>
+            </label>
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <svg viewBox="0 0 1900 2000" width="1900px" height="2000px">
+        {links.map((link, idx) => {
+          return <NodeLink start={link[0]} end={link[1]} key={`link${idx}`} />;
+        })}
+        {nodes?.map((col, idx) => {
+          return <ColumnNode {...col} key={col.name} />;
+        })}
+      </svg>
+    </Fragment>
   );
 }
 
