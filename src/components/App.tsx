@@ -64,7 +64,7 @@ function App() {
   }, []);
 
   return (
-    <svg viewBox="0 0 1500 2000" width="1500px" height="2000px">
+    <svg viewBox="0 0 1900 2000" width="1900px" height="2000px">
       {links.map((link) => {
         return <NodeLink start={link[0]} end={link[1]} />;
       })}

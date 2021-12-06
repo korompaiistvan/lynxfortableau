@@ -97,7 +97,10 @@ function ColumnNode(props: Props) {
             {/* {props.calculated ? props.syntax : props.sourceTable} */}
             {isCalculatedColumn(nodeState.data!) && (
               <Typography style={{ fontFamily: "JetBrains Mono" }}>
-                <b>Calculation</b> {nodeState.data.calculation}
+                <b>Calculation</b>
+                <pre style={{ fontSize: "9pt" }}>
+                  <code>{nodeState.data.calculation}</code>
+                </pre>
               </Typography>
             )}
             {isSourceColumn(nodeState.data!) && (

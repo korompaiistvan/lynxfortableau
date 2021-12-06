@@ -213,16 +213,41 @@ function stripJunkFromCalc(calculation: string): string {
   return cleanCalc;
 }
 
+function replaceNamesWithCaptions(
+  calculation: CalculatedColumn["calculation"],
+  dependsOn: Column[]
+): CalculatedColumn["calculation"] {
+  let calcWithCaptions = calculation;
+  dependsOn.forEach((col) => {
+    calcWithCaptions = calcWithCaptions.replaceAll(
+      col.name,
+      `[${col.caption}]`
+    );
+  });
+  return calcWithCaptions;
+}
+
 function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
   let graph = new Graph();
   for (let column of datasource.columns) {
     if (column.isCalculated) {
       const calcSyntax = stripJunkFromCalc(column.calculation);
-      const dependsOn = datasource.columns
-        .filter((c) => calcSyntax.includes(c.name))
-        .map((c) => c.name);
-      mappedColumns.push({ ...column, dependsOn, dependencyGeneration: 0 });
+      const dependsOn = datasource.columns.filter((c) =>
+        calcSyntax.includes(c.name)
+      );
+
+      const calculationWithCaptions = replaceNamesWithCaptions(
+        column.calculation,
+        dependsOn
+      );
+
+      mappedColumns.push({
+        ...column,
+        dependsOn: dependsOn.map((c) => c.name),
+        calculation: calculationWithCaptions,
+        dependencyGeneration: 0,
+      });
     } else {
       mappedColumns.push({ ...column, dependsOn: [], dependencyGeneration: 0 });
     }
