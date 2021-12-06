@@ -19,11 +19,6 @@ import {
 import type { link } from "../utils/state";
 import NodeLink from "./NodeLink";
 
-function initializeApp() {
-  const datasources = fetchSuperstore();
-  const superstoreDs = datasources[2];
-}
-
 function App() {
   const [links, setLinks] = useRecoilState(linksState);
   const [isInitialized, setIsInitialized] = useState(false);
