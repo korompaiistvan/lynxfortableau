@@ -23,7 +23,7 @@ class Graph {
 
   getVertex(vertexId: Vertex["id"]): Vertex {
     const vertex = this.vertices.filter((v) => v.id === vertexId)[0];
-    if (!vertex) throw `Vertex ${vertexId} does not exist in graph`;
+    if (!vertex) throw Error(`Vertex ${vertexId} does not exist in graph`);
     return vertex;
   }
 
@@ -38,9 +38,9 @@ class Graph {
   addEdge(edge: Edge) {
     if (this.hasEdge(edge)) return;
     if (!this.vertices.map((v) => v.id).includes(edge.from))
-      throw `Edge ${edge.from} does not exist on graph`;
+      throw Error(`Edge ${edge.from} does not exist on graph`);
     if (!this.vertices.map((v) => v.id).includes(edge.to))
-      throw `Edge ${edge.to} does not exist on graph`;
+      throw Error(`Edge ${edge.to} does not exist on graph`);
 
     this.edges.push(edge);
   }
@@ -98,10 +98,10 @@ class Graph {
         }
       }
 
-      currentGeneration.forEach((vertexId) => {
+      for (let vertexId of currentGeneration) {
         const vertex = this.getVertex(vertexId);
-        vertex.topologicalGeneration = generationIdx;
-      });
+        vertex.topologicalGeneration = generationIdx;   
+      }
       generationIdx++;
     }
   }

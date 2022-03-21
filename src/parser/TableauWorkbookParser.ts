@@ -1,7 +1,6 @@
 import {
   Column,
   Datasource,
-  Workbook,
   Parameter,
   SourceColumn,
   CalculatedColumn,
@@ -85,7 +84,7 @@ function getColumnsFromDatasourceElement(
   workbook: Document,
   datasource: Element
 ): Array<Column> {
-  const dsIsParameters = datasource.getAttribute("name") == "Parameters";
+  const dsIsParameters = datasource.getAttribute("name") === "Parameters";
   const calculatedColumnElements = dsIsParameters
     ? []
     : _evaluateXPath(workbook, "./column[calculation]", datasource);
@@ -213,7 +212,7 @@ function stripJunkFromCalc(calculation: string): string {
   return cleanCalc;
 }
 
-function replaceNamesWithCaptions(
+function replaceNamesWithCaptionsInCalculation(
   calculation: CalculatedColumn["calculation"],
   dependsOn: Column[]
 ): CalculatedColumn["calculation"] {
@@ -230,14 +229,15 @@ function replaceNamesWithCaptions(
 function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
   let graph = new Graph();
+
   for (let column of datasource.columns) {
     if (column.isCalculated) {
       const calcSyntax = stripJunkFromCalc(column.calculation);
       const dependsOn = datasource.columns.filter((c) =>
-        calcSyntax.includes(c.name)
+        calcSyntax.includes(c.name) || calcSyntax.includes(c.caption)
       );
 
-      const calculationWithCaptions = replaceNamesWithCaptions(
+      const calculationWithCaptions = replaceNamesWithCaptionsInCalculation(
         column.calculation,
         dependsOn
       );
@@ -261,7 +261,7 @@ function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   }
   graph.getTopologicalGenerations();
   graph.vertices.forEach((v) => {
-    mappedColumns.filter((c) => c.name == v.id)[0].dependencyGeneration =
+    mappedColumns.filter((c) => c.name === v.id)[0].dependencyGeneration =
       v.topologicalGeneration!;
   });
 
