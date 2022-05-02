@@ -9,31 +9,8 @@ import {
 } from "../types";
 import { Graph } from "./graf";
 
-/**
- * Returns the datasources from a Tableau workbook string
- * @param {string} xmlString - the Tableau workbook
- * @returns {Datasource[]} An array of {@link Datasource} objects, extracted from the workbook string
- */
-function getDatasourcesFromWorkbook(xmlString: string): Datasource[] {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", '[Number of Records]'];
 
-  const datasources = _evaluateXPath(
-    xmlDoc,
-    "/workbook/datasources/datasource"
-  );
-
-  return datasources.map((ds) => convertElementToDatasource(xmlDoc, ds));
-}
-
-/**
- * Evaluates an XPath expression and returns the result as an array
- * @access private
- * @param {Document} document - the document to run the expression on
- * @param {string} xpath - the XPath expression to be evaluated
- * @param {Node} [refNode=workbook] - the node relative to which the expression is evaluated
- * @returns {Element[]} - An array of the resulting Element objects
- */
 function _evaluateXPath(
   document: Document,
   xpath: string,
@@ -55,13 +32,52 @@ function _evaluateXPath(
   return resultNodes;
 }
 
-/**
- * Takes an Element and attempts to parse it as a Tableau datasource.
- * @param {Document} workbook - the workbook Document the Element is in. This is needed to
- * @param {Element} element - the Element to convert
- * @returns {Datasource} - a Datasource object
- */
-function convertElementToDatasource(
+export function stripJunkFromCalc(calculation: string): string {
+  let cleanCalc = calculation;
+  // first strip string literals
+  cleanCalc = cleanCalc.replaceAll(/".*?"/gs, "");
+  cleanCalc = cleanCalc.replaceAll(/'.*?'/gs, "");
+  // then strip comments, starting with `//`
+  cleanCalc = cleanCalc.replaceAll(/\/\/.*/g, "");
+  // as well as multiline comments starting with /* and ending with */
+  cleanCalc = cleanCalc.replaceAll(/\/\*.*\*\//gs, "");
+  cleanCalc = cleanCalc.trim();
+  return cleanCalc;
+}
+
+export function replaceNamesWithCaptionsInCalculation(
+  calculation: CalculatedColumn["calculation"],
+  dependsOn: Column[]
+): CalculatedColumn["calculation"] {
+  // Tableau sometimes stores the names of columns in the calculations instead of the captions like in the UI
+  let calcWithCaptions = calculation;
+  dependsOn.forEach((col) => {
+    calcWithCaptions = calcWithCaptions.replaceAll(
+      col.name,
+      `[${col.caption}]`
+    );
+  });
+  return calcWithCaptions;
+}
+
+export function convertStringToWorkbook(xmlString: string) {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+  return xmlDoc;
+}
+
+export function getDatasourcesFromWorkbook(xmlString: string): Datasource[] {
+  const xmlDoc = convertStringToWorkbook(xmlString);
+
+  const datasources = _evaluateXPath(
+    xmlDoc,
+    "/workbook/datasources/datasource"
+  );
+
+  return datasources.map((ds) => convertElementToDatasource(xmlDoc, ds));
+}
+
+export function convertElementToDatasource(
   workbook: Document,
   element: Element
 ): Datasource {
@@ -74,34 +90,39 @@ function convertElementToDatasource(
   };
 }
 
-/**
- * Extracts the column information from a datasource
- * @param {Document} workbook - the workbook that contains the datasource
- * @param {Element} datasource - the datasource to extract the columns from
- * @returns {Column[]} - an array of {@link Column}s
- */
-function getColumnsFromDatasourceElement(
+export function getSourceColumnElementsFromDatasourceElement(
+  workbook: Document,
+  datasource: Element
+): Array<Element> {
+  return _evaluateXPath(workbook, "./column[not(calculation)]", datasource);
+}
+
+export function getColumnsFromDatasourceElement(
   workbook: Document,
   datasource: Element
 ): Array<Column> {
   const dsIsParameters = datasource.getAttribute("name") === "Parameters";
+  const allColumns = _evaluateXPath(workbook, "./column", datasource).filter(
+    (c) => !(DISCARDED_COLUMN_NAMES.includes(c.getAttribute("name")!))
+  );
+  const parameterColumnElements = dsIsParameters ? allColumns : [];
   const calculatedColumnElements = dsIsParameters
     ? []
-    : _evaluateXPath(workbook, "./column[calculation]", datasource);
-  const parameterColumnElements = dsIsParameters
-    ? _evaluateXPath(workbook, "./column", datasource)
-    : [];
-  const sourceColumnElements = _evaluateXPath(
-    workbook,
-    "./column[not(calculation)]",
-    datasource
-  );
+    : allColumns.filter((c) =>
+        Array.from(c.children).some((ce) => ce.nodeName == "calculation")
+      );
+  const sourceColumnElements = dsIsParameters
+    ? []
+    : allColumns.filter(
+        (c) =>
+          !Array.from(c.children).some((ce) => ce.nodeName == "calculation")
+      );
 
   const calculatedColumns = calculatedColumnElements.map((e) =>
-    convertElementToCalculatedColumn(workbook, e)
+    convertElementToCalculatedColumn(e)
   );
   const parameterColumns = parameterColumnElements.map((e) =>
-    convertElementToParameter(workbook, e)
+    convertElementToParameter(e)
   );
   const sourceColumns = sourceColumnElements.map((e) =>
     convertElementToSourceColumn(workbook, e)
@@ -113,16 +134,7 @@ function getColumnsFromDatasourceElement(
   return columns;
 }
 
-/**
- * Converts the input element to a parameter
- * @param {Document} workbook - the workbook the Column element is in
- * @param {Element} element - the element holding the column information
- * @returns {Parameter} the parameter object
- */
-function convertElementToParameter(
-  workbook: Document,
-  element: Element
-): Parameter {
+export function convertElementToParameter(element: Element): Parameter {
   const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
 
@@ -134,25 +146,21 @@ function convertElementToParameter(
   };
 }
 
-/**
- * Converts the input element to a Calculated Column
- * @param {Document} workbook - the workbook the Column element is in
- * @param {Element} element - the element holding the column information
- * @returns {CalculatedColumn} a CalculatedColumn object
- */
-function convertElementToCalculatedColumn(
-  workbook: Document,
+export function convertElementToCalculatedColumn(
   element: Element
 ): CalculatedColumn {
   const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
 
-  const calculation = _evaluateXPath(
-    workbook,
-    "./calculation",
-    element
-  )[0].getAttribute("formula")!;
+  const calculationNode = Array.from(element.children).find(
+    (e) => e.nodeName == "calculation"
+  );
+  if (!calculationNode)
+    throw new Error("Supplied element has no <calculation> chlid");
 
+  const calculation = calculationNode.getAttribute("formula");
+  if (!calculation)
+    throw new Error("Cannot find formula attribute of calculation");
   return {
     name,
     caption,
@@ -162,13 +170,7 @@ function convertElementToCalculatedColumn(
   };
 }
 
-/**
- * Converts the input element to a source column (non-calculated)
- * @param {Document} workbook - the workbook the Column element is in
- * @param {Element} element - the element holding the column information
- * @returns {SourceColumn} a SourceColumn object
- */
-function convertElementToSourceColumn(
+export function convertElementToSourceColumn(
   workbook: Document,
   element: Element
 ): SourceColumn {
@@ -182,9 +184,10 @@ function convertElementToSourceColumn(
 
   const metadataRecord = _evaluateXPath(
     workbook,
-    "./connection/metadata-records/metadata-record[@class='column' and local-name[text()='[Category]']]",
+    `./connection/metadata-records/metadata-record[@class='column' and local-name[text()='${name}']]`,
     datasource
   )[0];
+  if (!metadataRecord) throw new Error(`metadata record not found for ${name}`);
 
   const sourceTable = _evaluateXPath(
     workbook,
@@ -194,47 +197,24 @@ function convertElementToSourceColumn(
 
   return {
     name,
-    caption: name,
+    caption: name.replace(/\[|\]/g, ""),
     isCalculated: false,
     isParameter: false,
     sourceTable,
   };
 }
 
-function stripJunkFromCalc(calculation: string): string {
-  // first strip string literals
-  let cleanCalc = calculation.replaceAll(/".*?"/gs, "");
-  // then strip comments, starting with `//`
-  cleanCalc = cleanCalc.replaceAll(/\/\/.*/g, "");
-  // as well as multiline comments starting with /* and ending with */
-  cleanCalc = cleanCalc.replaceAll(/\/\*.*\*\//gs, "");
-
-  return cleanCalc;
-}
-
-function replaceNamesWithCaptionsInCalculation(
-  calculation: CalculatedColumn["calculation"],
-  dependsOn: Column[]
-): CalculatedColumn["calculation"] {
-  let calcWithCaptions = calculation;
-  dependsOn.forEach((col) => {
-    calcWithCaptions = calcWithCaptions.replaceAll(
-      col.name,
-      `[${col.caption}]`
-    );
-  });
-  return calcWithCaptions;
-}
-
-function populateColumnDependencies(datasource: Datasource): MappedDatasource {
+export function populateColumnDependencies(
+  datasource: Datasource
+): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
   let graph = new Graph();
 
   for (let column of datasource.columns) {
     if (column.isCalculated) {
       const calcSyntax = stripJunkFromCalc(column.calculation);
-      const dependsOn = datasource.columns.filter((c) =>
-        calcSyntax.includes(c.name) || calcSyntax.includes(c.caption)
+      const dependsOn = datasource.columns.filter(
+        (c) => calcSyntax.includes(c.name)
       );
 
       const calculationWithCaptions = replaceNamesWithCaptionsInCalculation(
@@ -261,7 +241,7 @@ function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   }
   graph.getTopologicalGenerations();
   graph.vertices.forEach((v) => {
-    mappedColumns.filter((c) => c.name === v.id)[0].dependencyGeneration =
+    mappedColumns.find((c) => c.name === v.id)!.dependencyGeneration =
       v.topologicalGeneration!;
   });
 
@@ -271,4 +251,3 @@ function populateColumnDependencies(datasource: Datasource): MappedDatasource {
     columns: mappedColumns,
   };
 }
-export { getDatasourcesFromWorkbook, populateColumnDependencies };

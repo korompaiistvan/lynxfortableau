@@ -20,7 +20,7 @@ export interface CalculatedColumn extends BaseColumn {
   calculation: string;
 }
 export function isCalculatedColumn(column: Column): column is CalculatedColumn {
-  return (column as CalculatedColumn).isCalculated == true;
+  return (column as CalculatedColumn).isCalculated === true;
 }
 
 export interface SourceColumn extends BaseColumn {
@@ -31,8 +31,8 @@ export interface SourceColumn extends BaseColumn {
 }
 export function isSourceColumn(column: Column): column is SourceColumn {
   return (
-    (column as SourceColumn).isParameter == false &&
-    (column as SourceColumn).isCalculated == false
+    (column as SourceColumn).isParameter === false &&
+    (column as SourceColumn).isCalculated === false
   );
 }
 
@@ -42,7 +42,7 @@ export interface Parameter extends BaseColumn {
   dependencyGeneration?: 0;
 }
 export function isParameterColumn(column: Column): column is Parameter {
-  return (column as Parameter).isParameter == true;
+  return (column as Parameter).isParameter === true;
 }
 
 export type Column = Parameter | SourceColumn | CalculatedColumn;

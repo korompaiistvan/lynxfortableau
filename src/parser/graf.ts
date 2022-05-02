@@ -7,12 +7,12 @@ class Graph {
     this.edges = [];
   }
 
-  hasVertex(vertex: Vertex) {
-    return this.vertices.filter((v) => v.id === vertex.id).length > 0;
+  hasVertex(vertexId: Vertex['id']) {
+    return this.vertices.some((v) => v.id === vertexId);
   }
 
   addVertex(vertex: Vertex) {
-    if (!this.hasVertex(vertex)) {
+    if (!this.hasVertex(vertex.id)) {
       this.vertices.push(vertex);
     }
   }
@@ -37,11 +37,8 @@ class Graph {
 
   addEdge(edge: Edge) {
     if (this.hasEdge(edge)) return;
-    if (!this.vertices.map((v) => v.id).includes(edge.from))
-      throw Error(`Edge ${edge.from} does not exist on graph`);
-    if (!this.vertices.map((v) => v.id).includes(edge.to))
-      throw Error(`Edge ${edge.to} does not exist on graph`);
-
+    if (!this.hasVertex(edge.from)) throw Error(`Node ${edge.from} does not exist on graph`);
+    if (!this.hasVertex(edge.to)) throw Error(`Node ${edge.to} does not exist on graph`);
     this.edges.push(edge);
   }
 
@@ -79,10 +76,14 @@ class Graph {
     let indegreeMap = this.vertices.map((v) => {
       return { id: v.id, inDegree: this.inDegree(v) };
     });
+
     let zeroIndegree = indegreeMap
       .filter((m) => m.inDegree === 0)
       .map((m) => m.id);
+
+      
     indegreeMap = indegreeMap.filter((m) => m.inDegree > 0);
+      
     let generationIdx = 0;
     while (zeroIndegree.length > 0) {
       const currentGeneration = zeroIndegree;
@@ -102,6 +103,7 @@ class Graph {
         const vertex = this.getVertex(vertexId);
         vertex.topologicalGeneration = generationIdx;   
       }
+
       generationIdx++;
     }
   }

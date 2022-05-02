@@ -3,10 +3,7 @@ import {
   atomFamily,
   errorSelector,
   selectorFamily,
-  SerializableParam,
   DefaultValue,
-  useRecoilTransaction_UNSTABLE,
-  useRecoilState,
   constSelector,
   selector,
 } from "recoil";
@@ -14,7 +11,7 @@ import {
   getDatasourcesFromWorkbook,
   populateColumnDependencies,
 } from "../parser/TableauWorkbookParser";
-import { MappedColumn, Column, Workbook, MappedDatasource } from "../types";
+import { MappedColumn, Column, MappedDatasource } from "../types";
 import superstoreString from "./Superstore.twb";
 
 type NodeId = Column["name"];
@@ -35,7 +32,7 @@ export const workbookStringState = atom<undefined | string>({
 
 export const datasourceIdxState = atom<number>({
   key: "datasourceIdx",
-  default: 2,
+  default: 1,
 });
 
 export const datasourceState = selector<MappedDatasource | undefined>({
@@ -50,7 +47,7 @@ export const datasourceState = selector<MappedDatasource | undefined>({
 
     const datasourceIdx = get(datasourceIdxState);
     if (datasourceIdx >= datasources.length) {
-      return errorSelector("datasourceIdx out of bounds");
+      return errorSelector(`datasourceIdx ${datasourceIdx} out of bounds`);
     }
     return datasources[datasourceIdx];
   },
@@ -158,7 +155,9 @@ export const yIdxSelector = selectorFamily({
     ({ get }) => {
       const yIdx = get(graphLayoutState).get(nodeId);
       if (yIdx === undefined)
-        return errorSelector("the node id does not exist in the graph layout");
+        return errorSelector(
+          `the node id ${nodeId} does not exist in the graph layout`
+        );
       return yIdx;
     },
 });
