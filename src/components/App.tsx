@@ -2,11 +2,7 @@ import { Fragment, useEffect } from "react";
 import ColumnNode from "./ColumnNode";
 import { useSetRecoilState, useRecoilValue } from "recoil";
 
-import {
-  linksState,
-  workbookStringState,
-  nodesStaticState,
-} from "../utils/state";
+import { linksState, workbookStringState, nodesStaticState } from "../utils/state";
 import NodeLink from "./NodeLink";
 import { AppBar, Toolbar, Typography, Button, Box } from "@material-ui/core";
 
@@ -47,7 +43,7 @@ function App() {
           </Box>
         </Toolbar>
       </AppBar>
-      <svg viewBox="0 0 1900 2000" width="1900px" height="2000px">
+      <svg viewBox="0 0 4000 2000" width="4000px" height="2000px">
         {links.map((link, idx) => {
           return <NodeLink start={link[0]} end={link[1]} key={`link${idx}`} />;
         })}
