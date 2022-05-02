@@ -9,7 +9,7 @@ import {
 } from "../types";
 import { Graph } from "./graf";
 
-const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", '[Number of Records]'];
+const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", "[Number of Records]"];
 
 function _evaluateXPath(
   document: Document,
@@ -52,10 +52,7 @@ export function replaceNamesWithCaptionsInCalculation(
   // Tableau sometimes stores the names of columns in the calculations instead of the captions like in the UI
   let calcWithCaptions = calculation;
   dependsOn.forEach((col) => {
-    calcWithCaptions = calcWithCaptions.replaceAll(
-      col.name,
-      `[${col.caption}]`
-    );
+    calcWithCaptions = calcWithCaptions.replaceAll(col.name, `[${col.caption}]`);
   });
   return calcWithCaptions;
 }
@@ -69,18 +66,12 @@ export function convertStringToWorkbook(xmlString: string) {
 export function getDatasourcesFromWorkbook(xmlString: string): Datasource[] {
   const xmlDoc = convertStringToWorkbook(xmlString);
 
-  const datasources = _evaluateXPath(
-    xmlDoc,
-    "/workbook/datasources/datasource"
-  );
+  const datasources = _evaluateXPath(xmlDoc, "/workbook/datasources/datasource");
 
   return datasources.map((ds) => convertElementToDatasource(xmlDoc, ds));
 }
 
-export function convertElementToDatasource(
-  workbook: Document,
-  element: Element
-): Datasource {
+export function convertElementToDatasource(workbook: Document, element: Element): Datasource {
   const cols = getColumnsFromDatasourceElement(workbook, element);
   return {
     name: element.getAttribute("name")!,
@@ -103,30 +94,46 @@ export function getColumnsFromDatasourceElement(
 ): Array<Column> {
   const dsIsParameters = datasource.getAttribute("name") === "Parameters";
   const allColumns = _evaluateXPath(workbook, "./column", datasource).filter(
-    (c) => !(DISCARDED_COLUMN_NAMES.includes(c.getAttribute("name")!))
+    (c) => !DISCARDED_COLUMN_NAMES.includes(c.getAttribute("name")!)
   );
   const parameterColumnElements = dsIsParameters ? allColumns : [];
   const calculatedColumnElements = dsIsParameters
     ? []
-    : allColumns.filter((c) =>
-        Array.from(c.children).some((ce) => ce.nodeName == "calculation")
-      );
+    : allColumns.filter((c) => Array.from(c.children).some((ce) => ce.nodeName == "calculation"));
   const sourceColumnElements = dsIsParameters
     ? []
-    : allColumns.filter(
-        (c) =>
-          !Array.from(c.children).some((ce) => ce.nodeName == "calculation")
-      );
+    : allColumns.filter((c) => !Array.from(c.children).some((ce) => ce.nodeName == "calculation"));
 
   const calculatedColumns = calculatedColumnElements.map((e) =>
     convertElementToCalculatedColumn(e)
   );
-  const parameterColumns = parameterColumnElements.map((e) =>
-    convertElementToParameter(e)
-  );
-  const sourceColumns = sourceColumnElements.map((e) =>
-    convertElementToSourceColumn(workbook, e)
-  );
+  const parameterColumns = parameterColumnElements.map((e) => convertElementToParameter(e));
+  const sourceColumns = sourceColumnElements.map((e) => convertElementToSourceColumn(workbook, e));
+
+  // since Tableau's twb format sucks, we have to extend the sourceColumns list
+  // based on metadata-record
+  const metadataOnlySourceColumns: Array<SourceColumn> = _evaluateXPath(
+    workbook,
+    ".//metadata-record[@class='column']",
+    datasource
+  ).map((metadataRecord) => {
+    const sourceTable = _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent!;
+    const name = _evaluateXPath(workbook, "./local-name", metadataRecord)[0].textContent!;
+
+    return {
+      caption: name, // not necessarily the case, but a rename is not captured in the metadata record
+      name: name,
+      sourceTable: sourceTable,
+      isCalculated: false, // as I understand, only sourceColumns have metadata records
+      isParameter: false,
+      dependencyGeneration: 0, // by definition
+    };
+  });
+
+  // TODO: fix this for name collisions between columns of different datasources
+  for (let column of metadataOnlySourceColumns) {
+    if (sourceColumns.filter((c) => c.name === column.name).length > 0) continue;
+  }
 
   let columns: Array<Column> = [];
   columns = columns.concat(calculatedColumns, parameterColumns, sourceColumns);
@@ -146,21 +153,15 @@ export function convertElementToParameter(element: Element): Parameter {
   };
 }
 
-export function convertElementToCalculatedColumn(
-  element: Element
-): CalculatedColumn {
+export function convertElementToCalculatedColumn(element: Element): CalculatedColumn {
   const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
 
-  const calculationNode = Array.from(element.children).find(
-    (e) => e.nodeName == "calculation"
-  );
-  if (!calculationNode)
-    throw new Error("Supplied element has no <calculation> chlid");
+  const calculationNode = Array.from(element.children).find((e) => e.nodeName == "calculation");
+  if (!calculationNode) throw new Error("Supplied element has no <calculation> chlid");
 
   const calculation = calculationNode.getAttribute("formula");
-  if (!calculation)
-    throw new Error("Cannot find formula attribute of calculation");
+  if (!calculation) throw new Error("Cannot find formula attribute of calculation");
   return {
     name,
     caption,
@@ -170,17 +171,10 @@ export function convertElementToCalculatedColumn(
   };
 }
 
-export function convertElementToSourceColumn(
-  workbook: Document,
-  element: Element
-): SourceColumn {
+export function convertElementToSourceColumn(workbook: Document, element: Element): SourceColumn {
   const name = element.getAttribute("name")!;
   // find the metadata record in the datasource
-  const datasource = _evaluateXPath(
-    workbook,
-    "ancestor::datasource",
-    element
-  )[0];
+  const datasource = _evaluateXPath(workbook, "ancestor::datasource", element)[0];
 
   const metadataRecord = _evaluateXPath(
     workbook,
@@ -189,11 +183,7 @@ export function convertElementToSourceColumn(
   )[0];
   if (!metadataRecord) throw new Error(`metadata record not found for ${name}`);
 
-  const sourceTable = _evaluateXPath(
-    workbook,
-    "./parent-name",
-    metadataRecord
-  )[0].textContent!;
+  const sourceTable = _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent!;
 
   return {
     name,
@@ -204,18 +194,14 @@ export function convertElementToSourceColumn(
   };
 }
 
-export function populateColumnDependencies(
-  datasource: Datasource
-): MappedDatasource {
+export function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
   let graph = new Graph();
 
   for (let column of datasource.columns) {
     if (column.isCalculated) {
       const calcSyntax = stripJunkFromCalc(column.calculation);
-      const dependsOn = datasource.columns.filter(
-        (c) => calcSyntax.includes(c.name)
-      );
+      const dependsOn = datasource.columns.filter((c) => calcSyntax.includes(c.name));
 
       const calculationWithCaptions = replaceNamesWithCaptionsInCalculation(
         column.calculation,
@@ -233,7 +219,6 @@ export function populateColumnDependencies(
     }
     graph.addVertex({ id: column.name });
   }
-
   for (let column of mappedColumns) {
     column.dependsOn.forEach((d) => {
       graph.addEdge({ from: d, to: column.name });
@@ -241,8 +226,7 @@ export function populateColumnDependencies(
   }
   graph.getTopologicalGenerations();
   graph.vertices.forEach((v) => {
-    mappedColumns.find((c) => c.name === v.id)!.dependencyGeneration =
-      v.topologicalGeneration!;
+    mappedColumns.find((c) => c.name === v.id)!.dependencyGeneration = v.topologicalGeneration!;
   });
 
   return {
