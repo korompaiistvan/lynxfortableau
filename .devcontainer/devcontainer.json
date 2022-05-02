@@ -18,9 +18,13 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"eamodio.gitlens"
 	],
-
+	"mounts": [
+		"type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly",
+	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
