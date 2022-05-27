@@ -1,12 +1,5 @@
-import {
-  Card,
-  CardContent,
-  Collapse,
-  Typography,
-  CardHeader,
-  IconButton,
-} from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import { Card, CardContent, Collapse, Typography, CardHeader, IconButton } from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 
@@ -37,9 +30,7 @@ function ColumnNode(props: MappedColumn) {
   const width = useRecoilValue(widthSelector(nodeId));
   const xPosition = useRecoilValue(xPositionSelector(nodeId));
   const yPosition = useRecoilValue(yPositionSelector(nodeId));
-  const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(
-    highlightedNodeIdState
-  );
+  const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(highlightedNodeIdState);
   const [isClosed, setIsClosed] = useRecoilState(isClosedSelector(nodeId));
   const selfRef = useRef<HTMLElement>(null);
 

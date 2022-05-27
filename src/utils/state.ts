@@ -30,13 +30,18 @@ export const workbookStringState = atom<undefined | string>({
   default: superstoreString,
 });
 
+export const workbookNameState = atom<undefined | string>({
+  key: "workbookName",
+  default: "Sample - Superstore.twbx",
+});
+
 export const datasourceIdxState = atom<number>({
   key: "datasourceIdx",
   default: 1,
 });
 
-export const datasourceState = selector<MappedDatasource | undefined>({
-  key: "datasource",
+export const datasourcesState = selector<MappedDatasource[] | undefined>({
+  key: "datasources",
   get: ({ get }) => {
     const workbookStr = get(workbookStringState);
     if (!workbookStr) return;
@@ -45,7 +50,26 @@ export const datasourceState = selector<MappedDatasource | undefined>({
       populateColumnDependencies(ds)
     );
 
+    return datasources;
+  },
+});
+
+export const datasourceNamesState = selector<string[]>({
+  key: "datasourceNames",
+  get: ({ get }) => {
+    const datasources = get(datasourcesState);
+    if (!datasources) return [];
+    return datasources?.map((ds) => ds.caption);
+  },
+});
+
+export const selectedDatasourceState = selector<MappedDatasource | undefined>({
+  key: "selectedDatasource",
+  get: ({ get }) => {
     const datasourceIdx = get(datasourceIdxState);
+    const datasources = get(datasourcesState);
+    if (!datasources) return;
+
     if (datasourceIdx >= datasources.length) {
       return errorSelector(`datasourceIdx ${datasourceIdx} out of bounds`);
     }
@@ -56,7 +80,7 @@ export const datasourceState = selector<MappedDatasource | undefined>({
 export const nodesStaticState = selector<MappedColumn[] | undefined>({
   key: "nodesStatic",
   get: ({ get }) => {
-    const datasource = get(datasourceState);
+    const datasource = get(selectedDatasourceState);
     return datasource?.columns;
   },
 });
@@ -111,9 +135,7 @@ export const colIdxSelector = selectorFamily({
       if (!nodes) return errorSelector("there are no nodes yet");
       const node = nodes.find((n) => n.name == nodeId);
       if (!node) {
-        return errorSelector(
-          "that node does not exist in the nodes list (yet)"
-        );
+        return errorSelector("that node does not exist in the nodes list (yet)");
       }
       return node.dependencyGeneration;
     },
@@ -155,9 +177,7 @@ export const yIdxSelector = selectorFamily({
     ({ get }) => {
       const yIdx = get(graphLayoutState).get(nodeId);
       if (yIdx === undefined)
-        return errorSelector(
-          `the node id ${nodeId} does not exist in the graph layout`
-        );
+        return errorSelector(`the node id ${nodeId} does not exist in the graph layout`);
       return yIdx;
     },
 });
@@ -180,9 +200,7 @@ export const columnWidthSelector = selectorFamily<number, number>({
       const columnItems = get(columnItemsSelector(colIdx));
       if (columnItems.length === 0) return 0;
 
-      const openColumnItems = columnItems.filter(
-        (item) => !get(isClosedSelector(item))
-      );
+      const openColumnItems = columnItems.filter((item) => !get(isClosedSelector(item)));
       if (openColumnItems.length > 0) {
         return get(openWidthState);
       }
@@ -264,9 +282,7 @@ export const viewPortState = atom({
   default: [0, 0, 1500, 2000],
 });
 
-export const guardRecoilDefaultValue = (
-  candidate: unknown
-): candidate is DefaultValue => {
+export const guardRecoilDefaultValue = (candidate: unknown): candidate is DefaultValue => {
   if (candidate instanceof DefaultValue) return true;
   return false;
 };
@@ -298,9 +314,7 @@ export const yPositionSelector = selectorFamily<number, NodeId>({
       const margin = get(marginState);
       const yPosition = nodesAbove
         .map((n) =>
-          get(isClosedSelector(n))
-            ? get(closedHeightState)
-            : get(openHeightSelector(n))
+          get(isClosedSelector(n)) ? get(closedHeightState) : get(openHeightSelector(n))
         )
         .reduce((prev, curr) => {
           return prev + curr + vGutter;
@@ -314,9 +328,7 @@ export const widthSelector = selectorFamily({
   get:
     (nodeId: NodeId) =>
     ({ get }) => {
-      return get(isClosedSelector(nodeId))
-        ? get(closedWidthState)
-        : get(openWidthState);
+      return get(isClosedSelector(nodeId)) ? get(closedWidthState) : get(openWidthState);
     },
 });
 

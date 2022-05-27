@@ -23,10 +23,10 @@
 		"eamodio.gitlens"
 	],
 	"mounts": [
-		"type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly",
+		"type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": ["3000:3000"],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "yarn install",
