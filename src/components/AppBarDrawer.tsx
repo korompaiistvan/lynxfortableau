@@ -15,6 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
+import { Theme } from "@mui/material/styles";
 
 import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
 import {
@@ -23,6 +24,14 @@ import {
   datasourceIdxState,
   workbookNameState,
 } from "../utils/state";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
 
 function AppBarDrawer() {
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
@@ -67,69 +76,72 @@ function AppBarDrawer() {
         }}
       >
         <Collapse in={!drawerCollapsed}>
-          <Container
-            sx={{
-              height: "calc(100vh - 64px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              gap: "20px",
-            }}
-            maxWidth="sm"
-          >
-            <Box
+          <ThemeProvider theme={darkTheme}>
+            <Container
               sx={{
+                height: "calc(100vh - 64px)",
                 display: "flex",
-                width: "100%",
-                alignItems: "baseline",
-                justifyContent: "space-between",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
                 gap: "20px",
               }}
+              maxWidth="sm"
             >
-              <TextField
-                id="workbook-name"
-                label="Workbook"
-                variant="outlined"
-                disabled
-                value={workbookName}
-                sx={{ flexGrow: 1 }}
-              />
-              <input
-                accept=".twb"
-                hidden
-                id="raised-button-file"
-                multiple={false}
-                type="file"
-                onChange={handleWorkbookChange}
-              />
-              <label htmlFor="raised-button-file">
-                <Button variant="contained" size="large" component="span">
-                  Upload
-                </Button>
-              </label>
-            </Box>
-            <Box sx={{ width: "100%", display: "flex" }}>
-              <FormControl sx={{ flexGrow: 1 }}>
-                <InputLabel id="demo-simple-select-helper-label">Datasource</InputLabel>
-                <Select
-                  labelId="datasource-select-label"
-                  id="datasource-select"
-                  value={datasourceIdx}
-                  label="Datasource"
-                  onChange={handleDatasourceChange}
-                >
-                  {datasourceNames.map((dsn, idx) => {
-                    return (
-                      <MenuItem value={idx} key={`ds${idx}`}>
-                        {dsn}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            </Box>
-          </Container>
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                }}
+              >
+                <TextField
+                  id="workbook-name"
+                  label="Workbook"
+                  variant="outlined"
+                  disabled
+                  value={workbookName}
+                  sx={{ flexGrow: 1, color: (theme: Theme) => theme.palette.secondary.light }}
+                />
+                <input
+                  accept=".twb"
+                  hidden
+                  id="raised-button-file"
+                  multiple={false}
+                  type="file"
+                  onChange={handleWorkbookChange}
+                />
+                <label htmlFor="raised-button-file">
+                  <Button variant="contained" size="large" component="span">
+                    Upload
+                  </Button>
+                </label>
+              </Box>
+              <Box sx={{ width: "100%", display: "flex" }}>
+                <FormControl sx={{ flexGrow: 1 }}>
+                  <InputLabel id="demo-simple-select-helper-label">Datasource</InputLabel>
+                  <Select
+                    labelId="datasource-select-label"
+                    id="datasource-select"
+                    value={datasourceIdx}
+                    label="Datasource"
+                    onChange={handleDatasourceChange}
+                    color="success"
+                  >
+                    {datasourceNames.map((dsn, idx) => {
+                      return (
+                        <MenuItem value={idx} key={`ds${idx}`}>
+                          {dsn}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Container>
+          </ThemeProvider>
         </Collapse>
         <AppBar position="static" elevation={appBarElevation}>
           <Toolbar>
@@ -140,8 +152,8 @@ function AppBarDrawer() {
             <Button
               onClick={handleCollapseChange}
               endIcon={<ExpandMore />}
-              color="secondary"
-              variant="outlined"
+              color="inherit"
+              // variant="outlined"
             >
               {drawerCollapsed ? "Expand" : "Collapse"} menu
             </Button>
