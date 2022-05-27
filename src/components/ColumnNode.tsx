@@ -32,7 +32,7 @@ function ColumnNode(props: MappedColumn) {
   const yPosition = useRecoilValue(yPositionSelector(nodeId));
   const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(highlightedNodeIdState);
   const [isClosed, setIsClosed] = useRecoilState(isClosedSelector(nodeId));
-  const selfRef = useRef<HTMLElement>(null);
+  const selfRef = useRef<HTMLDivElement>(null);
 
   function changeExpanded(event: any) {
     setIsClosed(!isClosed);
