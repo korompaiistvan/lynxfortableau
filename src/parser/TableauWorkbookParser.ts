@@ -181,9 +181,8 @@ export function convertElementToSourceColumn(workbook: Document, element: Elemen
     `./connection/metadata-records/metadata-record[@class='column' and local-name[text()='${name}']]`,
     datasource
   )[0];
-  if (!metadataRecord) throw new Error(`metadata record not found for ${name}`);
 
-  const sourceTable = _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent!;
+  const sourceTable = metadataRecord ? _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent! : 'Unknown';
 
   return {
     name,
