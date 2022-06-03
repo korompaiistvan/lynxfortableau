@@ -1,13 +1,15 @@
-import { Fragment } from "react";
+import { Fragment, StrictMode } from "react";
 import GraphCanvas from "./GraphCanvas";
 import AppBarDrawer from "./AppBarDrawer";
 
 function App() {
   return (
-    <Fragment>
-      <GraphCanvas />
-      <AppBarDrawer />
-    </Fragment>
+    <StrictMode>
+      <Fragment>
+        <GraphCanvas />
+        <AppBarDrawer />
+      </Fragment>
+    </StrictMode>
   );
 }
 

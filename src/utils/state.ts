@@ -15,7 +15,7 @@ import { MappedColumn, Column, MappedDatasource } from "../types";
 import superstoreString from "./Superstore.twb";
 
 type NodeId = Column["name"];
-export type link = [NodeId, NodeId];
+export type Link = { id: string; start: NodeId; end: NodeId };
 
 export const hGutterState = constSelector(260);
 export const marginState = constSelector(40);
@@ -89,6 +89,7 @@ export interface NodeState {
   isClosed: boolean;
   openHeight: number;
 }
+
 export const nodesStateFamily = atomFamily<NodeState, NodeId>({
   key: "nodeState",
   default: selectorFamily({
@@ -112,18 +113,76 @@ export const nodeIdsState = selector<NodeId[]>({
   },
 });
 
-export const linksState = selector<link[]>({
+export const linksState = selector<Link[]>({
   key: "links",
   get: ({ get }) => {
     const nodes = get(nodesStaticState);
     if (!nodes) return [];
-    let links = [] as link[];
+    let links = [] as Link[];
+    let idx = 0;
     const calculatedNodes = nodes.filter((n) => n.isCalculated);
     calculatedNodes.forEach((node) => {
-      links = links.concat(node.dependsOn.map((d) => [d, node.name]));
+      links = links.concat(
+        node.dependsOn.map((d) => {
+          idx++;
+          return { id: `link-${idx}`, start: d, end: node.name };
+        })
+      );
     });
     return links;
   },
+});
+
+export const linkStaticState = selectorFamily({
+  key: "linkStatic",
+  get:
+    (linkId: string) =>
+    ({ get }) => {
+      const links = get(linksState);
+      const link = links.find((l) => l.id == linkId);
+      if (!link) return errorSelector(`link id ${linkId} cannot be found in links`);
+      return link;
+    },
+});
+
+export const linkDisplayState = selectorFamily({
+  key: "linkDisplay",
+  get:
+    (linkId: string) =>
+    ({ get }) => {
+      const { start, end } = get(linkStaticState(linkId));
+      const startNodeXPosition = get(xPositionSelector(start));
+      const startNodeYPosition = get(yPositionSelector(start));
+      const endNodeXPosition = get(xPositionSelector(end));
+      const endNodeYPosition = get(yPositionSelector(end));
+      const startNodeWidth = get(widthSelector(start));
+      const startNodeHeight = get(heightSelector(start));
+      const endNodeHeight = get(heightSelector(end));
+      const isHighlighted = get(isLinkHighlightedSelector(linkId));
+      // const isHighlighted = false;
+
+      return {
+        startNodeXPosition,
+        startNodeYPosition,
+        endNodeXPosition,
+        endNodeYPosition,
+        startNodeWidth,
+        startNodeHeight,
+        endNodeHeight,
+        isHighlighted,
+      };
+    },
+});
+
+export const isLinkHighlightedSelector = selectorFamily({
+  key: "isLinkHighlighted",
+  get:
+    (linkId: string) =>
+    ({ get }) => {
+      const link = get(linkStaticState(linkId));
+      const highlightedNodeId = get(highlightedNodeIdState);
+      return highlightedNodeId && [link.start, link.end].includes(highlightedNodeId);
+    },
 });
 
 export const colIdxSelector = selectorFamily({

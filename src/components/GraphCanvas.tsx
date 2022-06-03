@@ -1,4 +1,12 @@
-import { Fragment, WheelEvent, useState, useRef, useEffect, MouseEventHandler } from "react";
+import {
+  Fragment,
+  WheelEvent,
+  useState,
+  useRef,
+  useEffect,
+  MouseEventHandler,
+  useMemo,
+} from "react";
 import ColumnNode from "./ColumnNode";
 import { useRecoilValue } from "recoil";
 
@@ -84,6 +92,18 @@ function GraphCanvas() {
     movement_timer = setTimeout(storeDimensions, RESET_TIMEOUT);
   });
 
+  const nodeChildren = useMemo(() => {
+    return nodes?.map((col, idx) => {
+      return <ColumnNode {...col} key={col.name} />;
+    });
+  }, [nodes]);
+
+  const linkChildren = useMemo(() => {
+    return links.map((link, idx) => {
+      return <NodeLink id={link.id} key={link.id} />;
+    });
+  }, [links]);
+
   return (
     <svg
       viewBox={viewBox.join(" ")}
@@ -97,12 +117,8 @@ function GraphCanvas() {
       overflow="hidden"
       ref={SVGRef}
     >
-      {links.map((link, idx) => {
-        return <NodeLink start={link[0]} end={link[1]} key={`link${idx}`} />;
-      })}
-      {nodes?.map((col, idx) => {
-        return <ColumnNode {...col} key={col.name} />;
-      })}
+      {linkChildren}
+      {nodeChildren}
     </svg>
   );
 }

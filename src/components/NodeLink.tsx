@@ -4,24 +4,27 @@ import {
   xPositionSelector,
   yPositionSelector,
   highlightedNodeIdState,
+  isLinkHighlightedSelector,
+  linkDisplayState,
 } from "../utils/state";
 import { Column } from "../types";
 import { useRecoilValue } from "recoil";
+import { useMemo, memo } from "react";
 
 interface Props {
-  start: Column["name"];
-  end: Column["name"];
+  id: string;
 }
 function NodeLink(props: Props) {
-  const startNodeXPosition = useRecoilValue(xPositionSelector(props.start));
-  const endNodeXPosition = useRecoilValue(xPositionSelector(props.end));
-  const startNodeYPosition = useRecoilValue(yPositionSelector(props.start));
-  const endNodeYPosition = useRecoilValue(yPositionSelector(props.end));
-  const startNodeWidth = useRecoilValue(widthSelector(props.start));
-  const startNodeHeight = useRecoilValue(heightSelector(props.start));
-  const endNodeHeight = useRecoilValue(heightSelector(props.end));
-
-  const highlightedNodeId = useRecoilValue(highlightedNodeIdState);
+  const {
+    startNodeXPosition,
+    endNodeXPosition,
+    startNodeYPosition,
+    endNodeYPosition,
+    startNodeWidth,
+    startNodeHeight,
+    endNodeHeight,
+    isHighlighted,
+  } = useRecoilValue(linkDisplayState(props.id));
 
   const linkStartX = startNodeXPosition + startNodeWidth;
   const linkStartY = startNodeYPosition + startNodeHeight / 2;
@@ -37,8 +40,6 @@ function NodeLink(props: Props) {
   pathStr += " ";
   pathStr += `C ${ctrlPt1X} ${linkStartY}, ${ctrlPt2X} ${linkEndY}, ${linkEndX} ${linkEndY}`;
 
-  const isHighlighted =
-    highlightedNodeId && [props.start, props.end].includes(highlightedNodeId);
   const strokeColor = isHighlighted ? "black" : "#d1d1d1";
   const strokeWidth = isHighlighted ? "3" : "2";
   return (
@@ -47,7 +48,8 @@ function NodeLink(props: Props) {
       stroke={strokeColor}
       fill="transparent"
       strokeWidth={strokeWidth}
+      style={{ transition: "stroke 0.1s ease-in-out" }}
     />
   );
 }
-export default NodeLink;
+export default memo(NodeLink);

@@ -12,11 +12,8 @@ import {
 } from "../types";
 import {
   closedHeightState,
-  closedWidthState,
   isClosedSelector,
-  nodesStateFamily,
   openHeightSelector,
-  openWidthState,
   xPositionSelector,
   yPositionSelector,
   widthSelector,
@@ -25,13 +22,16 @@ import {
 
 function ColumnNode(props: MappedColumn) {
   const nodeId = props.name;
-  const setOpenHeight = useSetRecoilState(openHeightSelector(nodeId));
   const closedHeight = useRecoilValue(closedHeightState);
   const width = useRecoilValue(widthSelector(nodeId));
   const xPosition = useRecoilValue(xPositionSelector(nodeId));
   const yPosition = useRecoilValue(yPositionSelector(nodeId));
-  const [highlightedNodeId, setHighlightedNodeId] = useRecoilState(highlightedNodeIdState);
+
   const [isClosed, setIsClosed] = useRecoilState(isClosedSelector(nodeId));
+
+  const setOpenHeight = useSetRecoilState(openHeightSelector(nodeId));
+  const setHighlightedNodeId = useSetRecoilState(highlightedNodeIdState);
+
   const selfRef = useRef<HTMLDivElement>(null);
 
   function changeExpanded(event: any) {

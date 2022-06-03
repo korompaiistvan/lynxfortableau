@@ -11,6 +11,7 @@ const nodes = [
   { id: "G", label: "G", width: 100, height: 100 },
   { id: "H", label: "H", width: 100, height: 100 },
 ];
+
 const edges = [
   ["A", "D"],
   ["B", "D"],
@@ -22,6 +23,7 @@ const edges = [
   ["G", "H"],
   ["F", "H"],
 ];
+
 function Main() {
   const [graph, setGraph] = useState<dagre.graphlib.Graph>();
   useEffect(() => {
