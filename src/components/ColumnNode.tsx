@@ -1,15 +1,9 @@
 import { Card, CardContent, Collapse, Typography, CardHeader, IconButton } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
-import { useState, useEffect, useRef } from "react";
+import { useRef, Fragment } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 
-import {
-  Column,
-  isCalculatedColumn,
-  isParameterColumn,
-  isSourceColumn,
-  MappedColumn,
-} from "../types";
+import { isCalculatedColumn, isParameterColumn, isSourceColumn, MappedColumn } from "../types";
 import {
   closedHeightState,
   isClosedSelector,
@@ -18,7 +12,7 @@ import {
   yPositionSelector,
   widthSelector,
   highlightedNodeIdState,
-} from "../utils/state";
+} from "../state";
 
 function ColumnNode(props: MappedColumn) {
   const nodeId = props.name;
@@ -81,12 +75,14 @@ function ColumnNode(props: MappedColumn) {
           <CardContent>
             {/* {props.calculated ? props.syntax : props.sourceTable} */}
             {isCalculatedColumn(props) && (
-              <pre style={{ fontSize: "9pt" }}>
+              <Fragment>
                 <Typography style={{ fontFamily: "JetBrains Mono" }}>
                   <b>Calculation</b>
                 </Typography>
-                <code>{props.calculation}</code>
-              </pre>
+                <pre style={{ fontSize: "9pt", overflowX: "auto" }}>
+                  <code>{props.calculation}</code>
+                </pre>
+              </Fragment>
             )}
             {isSourceColumn(props) && (
               <Typography paragraph>

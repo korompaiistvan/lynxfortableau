@@ -71,3 +71,14 @@ export interface Workbook {
   datasources: Datasource[];
   parameters: Parameter[];
 }
+
+export type NodeId = Column["name"];
+
+export type Link = { id: string; start: NodeId; end: NodeId };
+
+export interface NodeState {
+  isClosed: boolean;
+  openHeight: number;
+}
+
+export type SortMode = "shortestLinks"; // later this will be a bit more options :D

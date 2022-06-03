@@ -1,16 +1,8 @@
-import {
-  Fragment,
-  WheelEvent,
-  useState,
-  useRef,
-  useEffect,
-  MouseEventHandler,
-  useMemo,
-} from "react";
+import { WheelEvent, useState, useRef, useEffect, MouseEventHandler, useMemo } from "react";
 import ColumnNode from "./ColumnNode";
 import { useRecoilValue } from "recoil";
 
-import { linksState, nodesStaticState } from "../utils/state";
+import { linksState, nodesStaticState } from "../state";
 import NodeLink from "./NodeLink";
 
 type ViewBox = [number, number, number, number];

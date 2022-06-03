@@ -1,15 +1,6 @@
-import {
-  heightSelector,
-  widthSelector,
-  xPositionSelector,
-  yPositionSelector,
-  highlightedNodeIdState,
-  isLinkHighlightedSelector,
-  linkDisplayState,
-} from "../utils/state";
-import { Column } from "../types";
+import { linkDisplayState } from "../state";
 import { useRecoilValue } from "recoil";
-import { useMemo, memo } from "react";
+import { memo } from "react";
 
 interface Props {
   id: string;
