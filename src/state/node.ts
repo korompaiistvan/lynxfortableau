@@ -10,7 +10,7 @@ import {
   openWidthState,
 } from "./renderingSettings";
 import { guardRecoilDefaultValue } from "./utils";
-import { columnWidthSelector, nodesAboveSelector } from "./graphLayout";
+import { columnWidthSelector, nodesAboveSelector, yBasePositionSelector } from "./graphLayout";
 
 import { MappedColumn, NodeId, NodeState } from "../types";
 
@@ -133,16 +133,17 @@ export const yPositionSelector = selectorFamily<number, NodeId>({
     (nodeId: NodeId) =>
     ({ get }) => {
       const nodesAbove = get(nodesAboveSelector(nodeId));
-      const vGutter = get(vGutterState);
-      const margin = get(marginState);
-      const yPosition = nodesAbove
-        .map((n) =>
-          get(isClosedSelector(n)) ? get(closedHeightState) : get(openHeightSelector(n))
-        )
+      const yBasePosition = get(yBasePositionSelector(nodeId));
+      const closedHeight = get(closedHeightState);
+
+      const offset = nodesAbove
+        .map((n) => {
+          return get(isClosedSelector(n)) ? 0 : get(openHeightSelector(n)) - closedHeight;
+        })
         .reduce((prev, curr) => {
-          return prev + curr + vGutter;
-        }, margin);
-      return yPosition;
+          return prev + curr;
+        }, 0);
+      return yBasePosition + offset;
     },
 });
 

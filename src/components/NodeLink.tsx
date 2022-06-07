@@ -27,9 +27,7 @@ function NodeLink(props: Props) {
   const ctrlPt1X = linkStartX + ctrlPtXOffset;
   const ctrlPt2X = linkEndX - ctrlPtXOffset;
 
-  let pathStr = `M ${linkStartX} ${linkStartY}`;
-  pathStr += " ";
-  pathStr += `C ${ctrlPt1X} ${linkStartY}, ${ctrlPt2X} ${linkEndY}, ${linkEndX} ${linkEndY}`;
+  const pathStr = `M ${linkStartX} ${linkStartY} C ${ctrlPt1X} ${linkStartY}, ${ctrlPt2X} ${linkEndY}, ${linkEndX} ${linkEndY}`;
 
   const strokeColor = isHighlighted ? "black" : "#d1d1d1";
   const strokeWidth = isHighlighted ? "3" : "2";
