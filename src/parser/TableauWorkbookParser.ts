@@ -160,8 +160,14 @@ export function convertElementToCalculatedColumn(element: Element): CalculatedCo
   const calculationNode = Array.from(element.children).find((e) => e.nodeName == "calculation");
   if (!calculationNode) throw new Error("Supplied element has no <calculation> chlid");
 
-  const calculation = calculationNode.getAttribute("formula");
-  if (!calculation) throw new Error("Cannot find formula attribute of calculation");
+  let calculation = "";
+  if (calculationNode.getAttribute("class") === "categorical-bin") {
+    // TODO: handle categorical bins i.e. groups properly
+    calculation = "This is a group";
+  } else {
+    calculation = calculationNode.getAttribute("formula") ?? "";
+    if (!calculation) throw new Error(`Cannot find formula attribute of calculation ${name}`);
+  }
   return {
     name,
     caption,
@@ -182,7 +188,9 @@ export function convertElementToSourceColumn(workbook: Document, element: Elemen
     datasource
   )[0];
 
-  const sourceTable = metadataRecord ? _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent! : 'Unknown';
+  const sourceTable = metadataRecord
+    ? _evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent!
+    : "Unknown";
 
   return {
     name,
