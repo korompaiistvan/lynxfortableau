@@ -9,11 +9,6 @@ import {
   populateColumnDependencies,
 } from "../parser/TableauWorkbookParser";
 
-export const datasourceIdxState = atom<number>({
-  key: "datasourceIdx",
-  default: 1,
-});
-
 export const datasourcesState = selector<MappedDatasource[] | undefined>({
   key: "datasources",
   get: ({ get }) => {
@@ -37,10 +32,15 @@ export const datasourceNamesState = selector<string[]>({
   },
 });
 
+export const selectedDatasourceIdxState = atom<number>({
+  key: "datasourceIdx",
+  default: 1,
+});
+
 export const selectedDatasourceState = selector<MappedDatasource | undefined>({
   key: "selectedDatasource",
   get: ({ get }) => {
-    const datasourceIdx = get(datasourceIdxState);
+    const datasourceIdx = get(selectedDatasourceIdxState);
     const datasources = get(datasourcesState);
     if (!datasources) return;
 

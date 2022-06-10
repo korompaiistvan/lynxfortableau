@@ -1,28 +1,17 @@
-import { atomFamily, errorSelector, selectorFamily, selector } from "recoil";
+import { atom, selectorFamily, atomFamily, errorSelector } from "recoil";
 
-import { selectedDatasourceState } from "./datasource";
 import {
   closedHeightState,
   marginState,
   hGutterState,
-  closedWidthState,
-  vGutterState,
-  openWidthState,
+  columnWidthState,
 } from "./renderingSettings";
 import { guardRecoilDefaultValue } from "./utils";
-import { columnWidthSelector, nodesAboveSelector, yBasePositionSelector } from "./graphLayout";
+import { nodesAboveSelector, yBasePositionSelector, colIdxSelector } from "./graphLayout";
 
-import { MappedColumn, NodeId, NodeState } from "../types";
+import { NodeId, NodeState } from "../types";
 
-export const nodesStaticState = selector<MappedColumn[] | undefined>({
-  key: "nodesStatic",
-  get: ({ get }) => {
-    const datasource = get(selectedDatasourceState);
-    return datasource?.columns;
-  },
-});
-
-export const nodesStateFamily = atomFamily<NodeState, NodeId>({
+export const nodesDynamicStateFamily = atomFamily<NodeState, NodeId>({
   key: "nodeState",
   default: selectorFamily({
     key: "nodeState/Default",
@@ -37,35 +26,12 @@ export const nodesStateFamily = atomFamily<NodeState, NodeId>({
   }),
 });
 
-export const nodeIdsState = selector<NodeId[]>({
-  key: "nodeIds",
-  get: ({ get }) => {
-    const nodes = get(nodesStaticState);
-    return nodes ? nodes.map((n) => n.name) : [];
-  },
-});
-
-export const colIdxSelector = selectorFamily({
-  key: "colIdx",
-  get:
-    (nodeId: NodeId) =>
-    ({ get }) => {
-      const nodes = get(nodesStaticState);
-      if (!nodes) return errorSelector("there are no nodes yet");
-      const node = nodes.find((n) => n.name == nodeId);
-      if (!node) {
-        return errorSelector("that node does not exist in the nodes list (yet)");
-      }
-      return node.dependencyGeneration;
-    },
-});
-
 export const isClosedSelector = selectorFamily({
   key: "isClosed",
   get:
     (nodeId: NodeId) =>
     ({ get }) => {
-      return get(nodesStateFamily(nodeId)).isClosed;
+      return get(nodesDynamicStateFamily(nodeId)).isClosed;
     },
   set:
     (nodeId: NodeId) =>
@@ -78,10 +44,21 @@ export const isClosedSelector = selectorFamily({
         return errorSelector("isClosed needs to be a boolean");
       }
 
-      return set(nodesStateFamily(nodeId), (prevState) => ({
+      return set(nodesDynamicStateFamily(nodeId), (prevState) => ({
         ...prevState,
         isClosed: newClosedState,
       }));
+    },
+});
+
+export const nodeHeightSelector = selectorFamily({
+  key: "height",
+  get:
+    (nodeId: NodeId) =>
+    ({ get }) => {
+      return get(isClosedSelector(nodeId))
+        ? get(closedHeightState)
+        : get(openHeightSelector(nodeId));
     },
 });
 
@@ -90,7 +67,7 @@ export const openHeightSelector = selectorFamily<number, NodeId>({
   get:
     (nodeId: NodeId) =>
     ({ get }) => {
-      return get(nodesStateFamily(nodeId)).openHeight;
+      return get(nodesDynamicStateFamily(nodeId)).openHeight;
     },
   set:
     (nodeId: NodeId) =>
@@ -99,14 +76,19 @@ export const openHeightSelector = selectorFamily<number, NodeId>({
         return errorSelector("reset is not implemented on this selector");
       }
 
-      if (typeof newOpenHeight !== "number") {
-        return errorSelector("newOpenHeight needs to be a number");
-      }
-
-      return set(nodesStateFamily(nodeId), (prevState) => ({
+      return set(nodesDynamicStateFamily(nodeId), (prevState) => ({
         ...prevState,
         openHeight: newOpenHeight,
       }));
+    },
+});
+
+export const nodeWidthSelector = selectorFamily({
+  key: "width",
+  get:
+    (nodeId: NodeId) =>
+    ({ get }) => {
+      return get(columnWidthState);
     },
 });
 
@@ -120,7 +102,7 @@ export const xPositionSelector = selectorFamily<number, NodeId>({
       const hGutter = get(hGutterState);
       let x = margin;
       for (let i = 0; i < colIdx; i++) {
-        const columnWidth = get(columnWidthSelector(i));
+        const columnWidth = get(columnWidthState);
         x += columnWidth + hGutter;
       }
       return x;
@@ -147,22 +129,7 @@ export const yPositionSelector = selectorFamily<number, NodeId>({
     },
 });
 
-export const widthSelector = selectorFamily({
-  key: "width",
-  get:
-    (nodeId: NodeId) =>
-    ({ get }) => {
-      return get(isClosedSelector(nodeId)) ? get(closedWidthState) : get(openWidthState);
-    },
-});
-
-export const heightSelector = selectorFamily({
-  key: "height",
-  get:
-    (nodeId: NodeId) =>
-    ({ get }) => {
-      return get(isClosedSelector(nodeId))
-        ? get(closedHeightState)
-        : get(openHeightSelector(nodeId));
-    },
+export const highlightedNodeIdState = atom<undefined | NodeId>({
+  key: "highlightedNode",
+  default: undefined,
 });

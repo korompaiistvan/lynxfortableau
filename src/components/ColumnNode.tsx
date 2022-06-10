@@ -1,7 +1,7 @@
 import { Card, CardContent, Collapse, Typography, CardHeader, IconButton } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { useRef, Fragment } from "react";
-import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
 
 import { isCalculatedColumn, isParameterColumn, isSourceColumn, MappedColumn } from "../types";
 import {
@@ -10,14 +10,14 @@ import {
   openHeightSelector,
   xPositionSelector,
   yPositionSelector,
-  widthSelector,
+  nodeWidthSelector,
   highlightedNodeIdState,
 } from "../state";
 
 function ColumnNode(props: MappedColumn) {
   const nodeId = props.name;
   const closedHeight = useRecoilValue(closedHeightState);
-  const width = useRecoilValue(widthSelector(nodeId));
+  const width = useRecoilValue(nodeWidthSelector(nodeId));
   const xPosition = useRecoilValue(xPositionSelector(nodeId));
   const yPosition = useRecoilValue(yPositionSelector(nodeId));
 
@@ -25,6 +25,7 @@ function ColumnNode(props: MappedColumn) {
 
   const setOpenHeight = useSetRecoilState(openHeightSelector(nodeId));
   const setHighlightedNodeId = useSetRecoilState(highlightedNodeIdState);
+  const resetHighlightedNodeId = useResetRecoilState(highlightedNodeIdState);
 
   const selfRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +57,7 @@ function ColumnNode(props: MappedColumn) {
         }}
         ref={selfRef}
         onMouseEnter={() => setHighlightedNodeId(props.name)}
-        onMouseLeave={() => setHighlightedNodeId(undefined)}
+        onMouseLeave={() => resetHighlightedNodeId()}
       >
         <CardHeader
           title={<Typography>{props.caption}</Typography>}

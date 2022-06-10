@@ -20,7 +20,7 @@ import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState 
 import {
   workbookStringState,
   datasourceNamesState,
-  datasourceIdxState,
+  selectedDatasourceIdxState,
   workbookNameState,
 } from "../state";
 
@@ -36,8 +36,8 @@ function AppBarDrawer() {
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
 
   const setWorkbookString = useSetRecoilState(workbookStringState);
-  const [datasourceIdx, setDatasourceIdx] = useRecoilState(datasourceIdxState);
-  const resetDatasourceIdx = useResetRecoilState(datasourceIdxState);
+  const [datasourceIdx, setDatasourceIdx] = useRecoilState(selectedDatasourceIdxState);
+  const resetDatasourceIdx = useResetRecoilState(selectedDatasourceIdxState);
   const [workbookName, setWorkbookName] = useRecoilState(workbookNameState);
 
   function handleWorkbookChange(event: React.ChangeEvent<HTMLInputElement>) {

@@ -1,17 +1,15 @@
 import { atom, selector, selectorFamily, errorSelector } from "recoil";
 import * as dagre from "dagre";
 
-import { linksState } from "./link";
-import { nodesStaticState, nodeIdsState, colIdxSelector, isClosedSelector } from "./node";
 import {
-  sortModeState,
-  openWidthState,
-  closedWidthState,
+  columnWidthState,
   hGutterState,
   vGutterState,
   closedHeightState,
   marginState,
 } from "./renderingSettings";
+import { linksState } from "./linkData";
+import { nodesStaticState } from "./nodeData";
 
 import { NodeId } from "../types";
 
@@ -21,10 +19,9 @@ export const graphLayoutState = selector<Map<NodeId, number>>({
     const nodes = get(nodesStaticState);
     if (!nodes) return new Map();
     const links = get(linksState);
-    const sortMode = get(sortModeState); // currently unused
     const hGutter = get(hGutterState);
     const vGutter = get(vGutterState);
-    const closedWidth = get(closedWidthState);
+    const columnWidth = get(columnWidthState);
     const closedHeight = get(closedHeightState);
     const margin = get(marginState);
 
@@ -34,7 +31,7 @@ export const graphLayoutState = selector<Map<NodeId, number>>({
     graph.setDefaultEdgeLabel(function () {
       return {};
     });
-    nodes.forEach((nd) => graph.setNode(nd.name, { width: closedWidth, height: closedHeight }));
+    nodes.forEach((nd) => graph.setNode(nd.name, { width: columnWidth, height: closedHeight }));
     links.forEach((eg) => graph.setEdge(eg.end, eg.start)); //edge direction are flipped on purpose
     dagre.layout(graph);
 
@@ -60,29 +57,30 @@ export const yBasePositionSelector = selectorFamily({
     },
 });
 
+// TODO: should be reading from the graph layout
+export const colIdxSelector = selectorFamily({
+  key: "colIdx",
+  get:
+    (nodeId: NodeId) =>
+    ({ get }) => {
+      const nodes = get(nodesStaticState);
+      if (!nodes) return errorSelector("there are no nodes yet");
+      const node = nodes.find((n) => n.name == nodeId);
+      if (!node) {
+        return errorSelector("that node does not exist in the nodes list (yet)");
+      }
+      return node.dependencyGeneration;
+    },
+});
+
 export const columnItemsSelector = selectorFamily({
   key: "columnItems",
   get:
     (colIdx) =>
     ({ get }) => {
-      const nodeIds = get(nodeIdsState);
+      const nodes = get(nodesStaticState);
+      const nodeIds = nodes ? nodes.map((n) => n.name) : [];
       return nodeIds.filter((id) => get(colIdxSelector(id)) === colIdx);
-    },
-});
-
-export const columnWidthSelector = selectorFamily<number, number>({
-  key: "columnWidth",
-  get:
-    (colIdx: number) =>
-    ({ get }) => {
-      const columnItems = get(columnItemsSelector(colIdx));
-      if (columnItems.length === 0) return 0;
-
-      const openColumnItems = columnItems.filter((item) => !get(isClosedSelector(item)));
-      if (openColumnItems.length > 0) {
-        return get(openWidthState);
-      }
-      return get(closedWidthState);
     },
 });
 
@@ -98,19 +96,4 @@ export const nodesAboveSelector = selectorFamily<NodeId[], NodeId>({
       );
       return nodesAbove;
     },
-});
-
-export const highlightedNodeIdState = atom<undefined | NodeId>({
-  key: "highlightedNode",
-  default: undefined,
-});
-
-export const zoomLevelState = atom({
-  key: "zoomLevel",
-  default: 1 as number,
-});
-
-export const viewPortState = atom({
-  key: "viewPort",
-  default: [0, 0, 1500, 2000],
 });
