@@ -7,7 +7,6 @@ import {
   MappedDatasource,
   MappedColumn,
 } from "../types";
-import { Graph } from "./graf";
 
 const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", "[Number of Records]"];
 
@@ -203,7 +202,6 @@ export function convertElementToSourceColumn(workbook: Document, element: Elemen
 
 export function populateColumnDependencies(datasource: Datasource): MappedDatasource {
   let mappedColumns: MappedColumn[] = [];
-  let graph = new Graph();
 
   for (let column of datasource.columns) {
     if (column.isCalculated) {
@@ -219,22 +217,11 @@ export function populateColumnDependencies(datasource: Datasource): MappedDataso
         ...column,
         dependsOn: dependsOn.map((c) => c.name),
         calculation: calculationWithCaptions,
-        dependencyGeneration: 0,
       });
     } else {
-      mappedColumns.push({ ...column, dependsOn: [], dependencyGeneration: 0 });
+      mappedColumns.push({ ...column, dependsOn: [] });
     }
-    graph.addVertex({ id: column.name });
   }
-  for (let column of mappedColumns) {
-    column.dependsOn.forEach((d) => {
-      graph.addEdge({ from: d, to: column.name });
-    });
-  }
-  graph.getTopologicalGenerations();
-  graph.vertices.forEach((v) => {
-    mappedColumns.find((c) => c.name === v.id)!.dependencyGeneration = v.topologicalGeneration!;
-  });
 
   return {
     ...datasource,

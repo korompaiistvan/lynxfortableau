@@ -7,7 +7,7 @@ import {
   columnWidthState,
 } from "./renderingSettings";
 import { guardRecoilDefaultValue } from "./utils";
-import { nodesAboveSelector, yBasePositionSelector, colIdxSelector } from "./graphLayout";
+import { nodesAboveSelector, xBasePositionSelector, yBasePositionSelector } from "./graphLayout";
 
 import { NodeId, NodeState } from "../types";
 
@@ -97,15 +97,9 @@ export const xPositionSelector = selectorFamily<number, NodeId>({
   get:
     (nodeId: NodeId) =>
     ({ get }) => {
-      const colIdx = get(colIdxSelector(nodeId));
-      const margin = get(marginState);
-      const hGutter = get(hGutterState);
-      let x = margin;
-      for (let i = 0; i < colIdx; i++) {
-        const columnWidth = get(columnWidthState);
-        x += columnWidth + hGutter;
-      }
-      return x;
+      // simple passthrough of base position, might chagne later
+      const xBasePosition = get(xBasePositionSelector(nodeId));
+      return xBasePosition;
     },
 });
 

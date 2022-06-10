@@ -48,7 +48,6 @@ export function isParameterColumn(column: Column): column is Parameter {
 export type Column = Parameter | SourceColumn | CalculatedColumn;
 export type MappedColumn = Column & {
   dependsOn: Array<Column["name"]>;
-  dependencyGeneration: number;
 };
 
 export interface Datasource {
