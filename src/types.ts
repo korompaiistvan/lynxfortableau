@@ -5,50 +5,47 @@ export interface Worksheet {
 }
 
 export type Calculation = string;
+export type ColumnType = "source" | "calculated" | "parameter"; // | 'group' | 'set' | 'bin'
 
-export interface BaseColumn {
+interface BaseColumn {
   name: string; // unique within the datasource
   caption: string;
-
-  isCalculated: boolean;
-  isParameter: boolean;
-}
-
-export interface CalculatedColumn extends BaseColumn {
-  isCalculated: true;
-  isParameter: false;
-  calculation: string;
-}
-export function isCalculatedColumn(column: Column): column is CalculatedColumn {
-  return (column as CalculatedColumn).isCalculated === true;
+  // datasource: Datasource;
+  type: ColumnType;
 }
 
 export interface SourceColumn extends BaseColumn {
-  isCalculated: false;
-  isParameter: false;
+  type: "source";
   sourceTable: string;
-  dependencyGeneration?: 0;
 }
-export function isSourceColumn(column: Column): column is SourceColumn {
-  return (
-    (column as SourceColumn).isParameter === false &&
-    (column as SourceColumn).isCalculated === false
-  );
-}
-
 export interface Parameter extends BaseColumn {
-  isCalculated: false;
-  isParameter: true;
-  dependencyGeneration?: 0;
+  type: "parameter";
 }
-export function isParameterColumn(column: Column): column is Parameter {
-  return (column as Parameter).isParameter === true;
+export interface RawCalculatedColumn extends BaseColumn {
+  type: "calculated";
+  rawFormula: string;
 }
-
-export type Column = Parameter | SourceColumn | CalculatedColumn;
-export type MappedColumn = Column & {
-  dependsOn: Array<Column["name"]>;
+export type RawColumn = Parameter | SourceColumn | RawCalculatedColumn;
+export type RawColumnWithDatasourceRef = RawColumn & {
+  datasource: RawDatasource;
 };
+
+export type QualifiedName = `[${Datasource["name"]}].[${RawColumn["name"]}]`;
+interface ColumnMappingInfo {
+  // qualifiedName: QualifiedName;
+  dependsOn: RawColumnWithDatasourceRef[];
+}
+export type MappedCalculatedColumn = RawCalculatedColumn &
+  ColumnMappingInfo & {
+    // qualifiedFormula: Calculation;
+    readableFormula: Calculation;
+  };
+
+export type MappedColumn =
+  | ((Parameter | SourceColumn) & ColumnMappingInfo)
+  | MappedCalculatedColumn;
+
+export type Column = RawColumn | MappedColumn;
 
 export interface Datasource {
   name: string;
@@ -57,6 +54,10 @@ export interface Datasource {
   columns: Column[];
 }
 
+export interface RawDatasource extends Datasource {
+  isColumnDependencyMapped: false;
+  columns: RawColumnWithDatasourceRef[];
+}
 export interface MappedDatasource extends Datasource {
   isColumnDependencyMapped: true;
   columns: MappedColumn[];
@@ -67,17 +68,25 @@ export interface ParameterDatasource extends Datasource {
 }
 
 export interface Workbook {
+  isMapped: boolean;
   datasources: Datasource[];
-  parameters: Parameter[];
+  sheets: Worksheet[];
+}
+
+export interface RawWorkbook extends Workbook {
+  isMapped: false;
+  datasources: RawDatasource[];
+}
+
+export interface MappedWorkbook extends Workbook {
+  isMapped: true;
+  datasources: MappedDatasource[];
 }
 
 export type NodeId = Column["name"];
-
 export type Link = { id: string; start: NodeId; end: NodeId };
 
 export interface NodeState {
   isClosed: boolean;
   openHeight: number;
 }
-
-export type SortMode = "shortestLinks"; // later this will be a bit more options :D

@@ -7,7 +7,7 @@ import {
   populateColumnDependencies,
   replaceNamesWithCaptionsInCalculation,
   stripJunkFromCalc,
-} from "../src/parser/TableauWorkbookParser";
+} from "../src/parser";
 import superstoreString from "../src/utils/Superstore.twb";
 
 test("converts strings to XMLDocs", () => {
