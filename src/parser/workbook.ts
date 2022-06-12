@@ -24,7 +24,7 @@ function convertDocumentToRawWorkbook(xmlDoc: Document): RawWorkbook {
   };
 }
 
-function mapRawWorkbook(workbook: RawWorkbook): MappedWorkbook {
+export function mapRawWorkbook(workbook: RawWorkbook): MappedWorkbook {
   const { datasources } = workbook;
   const mappedDatasources: MappedDatasource[] = datasources.map((ds) =>
     mapDatasource(ds, workbook)

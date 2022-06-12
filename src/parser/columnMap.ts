@@ -17,7 +17,7 @@ import {
   QualifiedName,
 } from "../types";
 
-function stripJunkFromCalc(calculation: string): string {
+export function stripJunkFromCalc(calculation: string): string {
   let cleanCalc = calculation;
   // first strip string literals
   cleanCalc = cleanCalc.replaceAll(/".*?"/gs, "");
@@ -52,7 +52,10 @@ export function mapRawColumn(
     if (dependentColumn.datasource.name === column.datasource.name) {
       if (!strippedFormula.includes(column.name)) continue;
       dependsOn.push(dependentColumn);
-      readableFormula = readableFormula.replaceAll(dependentColumn.name, `${dependentColumn.name}`);
+      readableFormula = readableFormula.replaceAll(
+        dependentColumn.name,
+        `[${dependentColumn.caption}]`
+      );
     } else {
       const qualifiedName = `[${dependentColumn.datasource.name}].[${dependentColumn.name}]`;
       if (!strippedFormula.includes(qualifiedName)) continue;

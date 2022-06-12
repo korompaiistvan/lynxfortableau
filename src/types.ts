@@ -30,10 +30,9 @@ export type RawColumnWithDatasourceRef = RawColumn & {
   datasource: RawDatasource;
 };
 
-export type QualifiedName = `[${Datasource["name"]}].[${RawColumn["name"]}]`;
 interface ColumnMappingInfo {
-  // qualifiedName: QualifiedName;
   dependsOn: RawColumnWithDatasourceRef[];
+  datasource: MappedDatasource;
 }
 export type MappedCalculatedColumn = RawCalculatedColumn &
   ColumnMappingInfo & {
@@ -41,9 +40,17 @@ export type MappedCalculatedColumn = RawCalculatedColumn &
     readableFormula: Calculation;
   };
 
-export type MappedColumn =
-  | ((Parameter | SourceColumn) & ColumnMappingInfo)
-  | MappedCalculatedColumn;
+// export type MappedColumn =
+//   | ((Parameter | SourceColumn) & ColumnMappingInfo)
+//   | MappedCalculatedColumn;
+
+export type MappedColumnGeneric<Type> = (Type extends RawCalculatedColumn
+  ? Type & {
+      readableFormula: Calculation;
+    }
+  : Type) &
+  ColumnMappingInfo;
+export type MappedColumn = MappedColumnGeneric<RawColumnWithDatasourceRef>;
 
 export type Column = RawColumn | MappedColumn;
 

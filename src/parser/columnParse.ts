@@ -89,7 +89,7 @@ function getMetadataOnlySourceColumns(
       const name = evaluateXPath(workbook, "./local-name", metadataRecord)[0].textContent!;
 
       return {
-        caption: name, // not necessarily the case, but a rename is not captured in the metadata record
+        caption: name.replaceAll(/[\[\]]/g, ""), // not necessarily the case, but a rename is not captured in the metadata record
         name: name,
         sourceTable: sourceTable,
         type: "source",
