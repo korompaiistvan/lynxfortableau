@@ -5,7 +5,6 @@ import {
   MappedWorkbook,
   Parameter,
   RawCalculatedColumn,
-  RawColumnWithDatasourceRef,
   RawDatasource,
   SourceColumn,
 } from "src/types";
@@ -179,32 +178,27 @@ describe("translates datasource element into Datasource object", () => {
       name: "federated.1uk8ts01uomc1z17rjjdj1xfe1av",
       caption: "Sample - Superstore",
       isColumnDependencyMapped: false,
-      columns: [],
+      columns: [
+        {
+          name: "[Calculation_5571209093911105]",
+          caption: "Profit Ratio",
+          rawFormula: "SUM([Profit])/SUM([Sales])",
+          type: "calculated",
+        },
+        {
+          name: "[Profit]",
+          caption: "Profit",
+          sourceTable: "[Orders]",
+          type: "source",
+        },
+        {
+          name: "[Sales]",
+          caption: "Sales",
+          sourceTable: "[Orders]",
+          type: "source",
+        },
+      ],
     };
-    const columns: RawColumnWithDatasourceRef[] = [
-      {
-        name: "[Calculation_5571209093911105]",
-        caption: "Profit Ratio",
-        rawFormula: "SUM([Profit])/SUM([Sales])",
-        type: "calculated",
-        datasource: expectedDatasource,
-      },
-      {
-        name: "[Profit]",
-        caption: "Profit",
-        sourceTable: "[Orders]",
-        type: "source",
-        datasource: expectedDatasource,
-      },
-      {
-        name: "[Sales]",
-        caption: "Sales",
-        sourceTable: "[Orders]",
-        type: "source",
-        datasource: expectedDatasource,
-      },
-    ];
-    expectedDatasource.columns = columns;
     expect(convertElementToRawDatasource(basicWorkbook, datasource)).toEqual(expectedDatasource);
   });
   test("datasource with hidden columns", () => {
@@ -232,46 +226,40 @@ describe("translates datasource element into Datasource object", () => {
       name: "federated.1uk8ts01uomc1z17rjjdj1xfe1av",
       caption: "Sample - Superstore",
       isColumnDependencyMapped: false,
-      columns: [],
+      columns: [
+        {
+          name: "[Calculation_5571209093911105]",
+          caption: "Profit Ratio",
+          rawFormula: "SUM([Profit])/SUM([Sales])",
+          type: "calculated",
+        },
+        {
+          name: "[Calculation_6698435196813887]",
+          caption: "Calc with Hidden Column",
+          rawFormula: "IF [hidden_column] THEN [Calculation_5571209093911105] END",
+          type: "calculated",
+        },
+        {
+          name: "[Profit]",
+          caption: "Profit",
+          sourceTable: "[Orders]",
+          type: "source",
+        },
+        {
+          name: "[Sales]",
+          caption: "Sales",
+          sourceTable: "[Orders]",
+          type: "source",
+        },
+        {
+          caption: "hidden_column",
+          name: "[hidden_column]",
+          sourceTable: "[Orders]",
+          type: "source",
+        },
+      ],
     };
-    const expectedColumns: RawColumnWithDatasourceRef[] = [
-      {
-        name: "[Calculation_5571209093911105]",
-        caption: "Profit Ratio",
-        rawFormula: "SUM([Profit])/SUM([Sales])",
-        type: "calculated",
-        datasource: expectedDatasource,
-      },
-      {
-        name: "[Calculation_6698435196813887]",
-        caption: "Calc with Hidden Column",
-        rawFormula: "IF [hidden_column] THEN [Calculation_5571209093911105] END",
-        type: "calculated",
-        datasource: expectedDatasource,
-      },
-      {
-        name: "[Profit]",
-        caption: "Profit",
-        sourceTable: "[Orders]",
-        type: "source",
-        datasource: expectedDatasource,
-      },
-      {
-        name: "[Sales]",
-        caption: "Sales",
-        sourceTable: "[Orders]",
-        type: "source",
-        datasource: expectedDatasource,
-      },
-      {
-        caption: "hidden_column",
-        datasource: expectedDatasource,
-        name: "[hidden_column]",
-        sourceTable: "[Orders]",
-        type: "source",
-      },
-    ];
-    expectedDatasource.columns = expectedColumns;
+
     expect(convertElementToRawDatasource(basicWorkbook, datasourceElement)).toEqual(
       expectedDatasource
     );
@@ -284,83 +272,73 @@ describe("maps the field dependencies accurately", () => {
       caption: "Best DS ever",
       name: "federated_kljbasoidhfoiuabef",
       isColumnDependencyMapped: false,
-      columns: [],
+      columns: [
+        {
+          type: "source",
+          caption: "Source Col A",
+          name: "[source_column_a]",
+          sourceTable: "Actually not sure",
+        },
+        {
+          type: "source",
+          caption: "Source Col B",
+          name: "[source_column_b]",
+          sourceTable: "Actually not sure",
+        },
+        {
+          type: "calculated",
+          caption: "1st level Calc",
+          name: "[level_1_calc]",
+          rawFormula: "[source_column_a] + [source_column_b]",
+        },
+        {
+          type: "calculated",
+          caption: "2nd level Calc",
+          name: "[level_2_calc]",
+          rawFormula: "[level_1_calc] + [source_column_b]",
+        },
+      ],
     };
-    const columns: RawColumnWithDatasourceRef[] = [
-      {
-        type: "source",
-        caption: "Source Col A",
-        name: "[source_column_a]",
-        datasource,
-        sourceTable: "Actually not sure",
-      },
-      {
-        type: "source",
-        caption: "Source Col B",
-        name: "[source_column_b]",
-        datasource,
-        sourceTable: "Actually not sure",
-      },
-      {
-        type: "calculated",
-        caption: "1st level Calc",
-        name: "[level_1_calc]",
-        datasource,
-        rawFormula: "[source_column_a] + [source_column_b]",
-      },
-      {
-        type: "calculated",
-        caption: "2nd level Calc",
-        name: "[level_2_calc]",
-        datasource,
-        rawFormula: "[level_1_calc] + [source_column_b]",
-      },
-    ];
-    datasource.columns = columns;
 
     const expectedDatasource: MappedDatasource = {
       caption: "Best DS ever",
       name: "federated_kljbasoidhfoiuabef",
       isColumnDependencyMapped: true,
-      columns: [],
+      columns: [
+        {
+          type: "source",
+          caption: "Source Col A",
+          name: "[source_column_a]",
+          sourceTable: "Actually not sure",
+          dependsOn: [],
+        },
+        {
+          type: "source",
+          caption: "Source Col B",
+          name: "[source_column_b]",
+          sourceTable: "Actually not sure",
+          dependsOn: [],
+        },
+        {
+          type: "calculated",
+          caption: "1st level Calc",
+          name: "[level_1_calc]",
+          rawFormula: "[source_column_a] + [source_column_b]",
+          readableFormula: "[Source Col A] + [Source Col B]",
+          // dependsOn: [expectedColumns[0], expectedColumns[1]],
+          dependsOn: [{ columnName: "[source_column_a]" }, { columnName: "[source_column_b]" }],
+        },
+        {
+          type: "calculated",
+          caption: "2nd level Calc",
+          name: "[level_2_calc]",
+          rawFormula: "[level_1_calc] + [source_column_b]",
+          readableFormula: "[1st level Calc] + [Source Col B]",
+          // dependsOn: [expectedColumns[1], expectedColumns[2]],
+          dependsOn: [{ columnName: "[source_column_b]" }, { columnName: "[level_1_calc]" }],
+        },
+      ],
     };
-    const expectedColumns: MappedColumn[] = [
-      {
-        type: "source",
-        caption: "Source Col A",
-        name: "[source_column_a]",
-        datasource: expectedDatasource,
-        sourceTable: "Actually not sure",
-        dependsOn: [],
-      },
-      {
-        type: "source",
-        caption: "Source Col B",
-        name: "[source_column_b]",
-        datasource: expectedDatasource,
-        sourceTable: "Actually not sure",
-        dependsOn: [],
-      },
-    ];
-    expectedColumns.push({
-      type: "calculated",
-      caption: "1st level Calc",
-      name: "[level_1_calc]",
-      datasource: expectedDatasource,
-      rawFormula: "[source_column_a] + [source_column_b]",
-      readableFormula: "[Source Col A] + [Source Col B]",
-      dependsOn: [expectedColumns[0], expectedColumns[1]],
-    });
-    expectedColumns.push({
-      type: "calculated",
-      caption: "2nd level Calc",
-      name: "[level_2_calc]",
-      datasource: expectedDatasource,
-      rawFormula: "[level_1_calc] + [source_column_b]",
-      readableFormula: "[1st level Calc] + [Source Col B]",
-      dependsOn: [expectedColumns[1], expectedColumns[2]],
-    });
-    expectedDatasource.columns = expectedColumns;
     const expectedWorkbook: MappedWorkbook = {
       isMapped: true,
       datasources: [expectedDatasource],
@@ -374,13 +352,6 @@ describe("maps the field dependencies accurately", () => {
     });
 
     // sort columns before equality check
-    function sortingFn(a: MappedColumn, b: MappedColumn) {
-      return a.name.localeCompare(b.name);
-    }
-    expectedDatasource.columns.sort(sortingFn);
-    receivedWorkbook.datasources[0].columns.sort(sortingFn);
-    console.log(receivedWorkbook.datasources[0].columns);
-    console.log(expectedWorkbook.datasources[0].columns);
     expect(receivedWorkbook).toEqual(expectedWorkbook);
   });
 });

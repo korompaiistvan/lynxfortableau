@@ -7,7 +7,6 @@ import {
   MappedDatasource,
   MappedColumn,
   Calculation,
-  MappedCalculatedColumn,
   RawWorkbook,
   RawDatasource,
   Worksheet,

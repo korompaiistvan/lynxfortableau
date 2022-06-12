@@ -10,7 +10,6 @@ export type ColumnType = "source" | "calculated" | "parameter"; // | 'group' | '
 interface BaseColumn {
   name: string; // unique within the datasource
   caption: string;
-  // datasource: Datasource;
   type: ColumnType;
 }
 
@@ -26,53 +25,37 @@ export interface RawCalculatedColumn extends BaseColumn {
   rawFormula: string;
 }
 export type RawColumn = Parameter | SourceColumn | RawCalculatedColumn;
-export type RawColumnWithDatasourceRef = RawColumn & {
-  datasource: RawDatasource;
-};
 
-interface ColumnMappingInfo {
-  dependsOn: RawColumnWithDatasourceRef[];
-  datasource: MappedDatasource;
+export interface ColumnDependency {
+  datasourceName?: Datasource["name"];
+  columnName: Column["name"];
 }
-export type MappedCalculatedColumn = RawCalculatedColumn &
-  ColumnMappingInfo & {
-    // qualifiedFormula: Calculation;
-    readableFormula: Calculation;
-  };
 
-// export type MappedColumn =
-//   | ((Parameter | SourceColumn) & ColumnMappingInfo)
-//   | MappedCalculatedColumn;
-
-export type MappedColumnGeneric<Type> = (Type extends RawCalculatedColumn
-  ? Type & {
-      readableFormula: Calculation;
-    }
-  : Type) &
-  ColumnMappingInfo;
-export type MappedColumn = MappedColumnGeneric<RawColumnWithDatasourceRef>;
+export type MappedColumn = (
+  | Parameter
+  | SourceColumn
+  | (RawCalculatedColumn & { readableFormula: Calculation })
+) & { dependsOn: ColumnDependency[] };
 
 export type Column = RawColumn | MappedColumn;
 
-export interface Datasource {
+export interface BaseDatasource {
   name: string;
   caption: string;
   isColumnDependencyMapped: boolean;
-  columns: Column[];
 }
 
-export interface RawDatasource extends Datasource {
+export interface RawDatasource extends BaseDatasource {
   isColumnDependencyMapped: false;
-  columns: RawColumnWithDatasourceRef[];
+  columns: RawColumn[];
 }
-export interface MappedDatasource extends Datasource {
+
+export interface MappedDatasource extends BaseDatasource {
   isColumnDependencyMapped: true;
   columns: MappedColumn[];
 }
 
-export interface ParameterDatasource extends Datasource {
-  columns: Parameter[];
-}
+export type Datasource = RawDatasource | MappedDatasource;
 
 export interface Workbook {
   isMapped: boolean;

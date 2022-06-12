@@ -8,13 +8,11 @@ import {
   MappedDatasource,
   MappedColumn,
   Calculation,
-  MappedCalculatedColumn,
   RawWorkbook,
   RawDatasource,
   Worksheet,
   MappedWorkbook,
-  RawColumnWithDatasourceRef,
-  QualifiedName,
+  ColumnDependency,
 } from "../types";
 
 export function stripJunkFromCalc(calculation: string): string {
@@ -30,42 +28,96 @@ export function stripJunkFromCalc(calculation: string): string {
   return cleanCalc;
 }
 
-export function mapRawColumn(
-  column: RawColumnWithDatasourceRef,
+export function replaceNamesWithCaptions(
+  calculation: Calculation,
+  dependsOn: ColumnDependency[],
+  parentDatasource: Datasource,
+  datasources: Datasource[]
+): Calculation {
+  let readableFormula = calculation;
+
+  dependsOn.forEach((dep) => {
+    const { datasourceName, columnName } = dep;
+    const datasource = datasourceName
+      ? datasources.find((d) => d.name == dep.datasourceName)
+      : parentDatasource;
+    if (!datasource)
+      throw new Error(`Datasource ${datasourceName} not found while replacing names with captions`);
+
+    const col = datasource.columns.find((c) => c.name == columnName);
+    if (!col)
+      throw new Error(
+        `Column ${columnName} not found in datasource ${datasource.name} while replacing names with captions`
+      );
+
+    const searchName = datasourceName ? `[${datasourceName}].${columnName}` : `${columnName}`;
+    const replaceName = datasourceName
+      ? `[${datasource.caption}].[${col.caption}]`
+      : `[${col.caption}]`;
+    readableFormula = readableFormula.replaceAll(searchName, replaceName);
+  });
+  return readableFormula;
+}
+
+function findDependencies(
+  column: RawCalculatedColumn,
+  parentDatasource: Datasource,
   datasources: RawDatasource[]
-): MappedColumn {
-  // this function does two things:
-  //   - determine what other columns a given calculation depends on
-  //   - replace those references to include the caption of the column instead of the name
-  // the only reason they are not separated is easier type annotations (avoid defining an additional version of Column)
+): ColumnDependency[] {
+  // const allColumns: ColumnDependency[] = datasources
+  //   .map((d) =>
+  //     d.columns.map((c) => {
+  //       return { datasourceName: d.name, columnName: column.name };
+  //     })
+  //   )
+  //   .flat();
 
-  if (column.type !== "calculated") {
-    return { ...column, dependsOn: [] };
-  }
-
-  const allColumns = datasources.map((d) => d.columns).flat();
-  let readableFormula = column.rawFormula;
   const strippedFormula = stripJunkFromCalc(column.rawFormula);
   const dependsOn = [];
 
-  for (let dependentColumn of allColumns) {
-    if (dependentColumn.datasource.name === column.datasource.name) {
-      if (!strippedFormula.includes(column.name)) continue;
-      dependsOn.push(dependentColumn);
-      readableFormula = readableFormula.replaceAll(
-        dependentColumn.name,
-        `[${dependentColumn.caption}]`
-      );
-    } else {
-      const qualifiedName = `[${dependentColumn.datasource.name}].[${dependentColumn.name}]`;
-      if (!strippedFormula.includes(qualifiedName)) continue;
-      dependsOn.push(dependentColumn);
-      readableFormula = readableFormula.replaceAll(
-        qualifiedName,
-        `[${dependentColumn.datasource.caption}].${dependentColumn.caption}`
-      );
-    }
+  // look for foreign columns first in case of name collision
+  const foreignDatasources = datasources.filter((ds) => ds.name !== parentDatasource.name);
+  const foreignColumns: ColumnDependency[] = foreignDatasources
+    .map((d) =>
+      d.columns.map((c) => {
+        return { datasourceName: d.name, columnName: column.name };
+      })
+    )
+    .flat();
+
+  for (let dependency of foreignColumns) {
+    const qualifiedName = `[${dependency.datasourceName}].[${dependency.columnName}]`;
+    if (!strippedFormula.includes(qualifiedName)) continue;
+    dependsOn.push(dependency);
   }
+
+  // then look for siblings
+  const siblingColumns = parentDatasource.columns.map((c) => {
+    return { columnName: c.name };
+  });
+  for (let dependency of siblingColumns) {
+    const { columnName } = dependency;
+    if (!strippedFormula.includes(columnName)) continue;
+    dependsOn.push(dependency);
+  }
+
+  return dependsOn;
+}
+
+export function mapRawColumn(
+  column: RawColumn,
+  parentDatasource: RawDatasource,
+  datasources: RawDatasource[]
+): MappedColumn {
+  if (column.type !== "calculated") return { ...column, dependsOn: [] };
+  const dependsOn = findDependencies(column, parentDatasource, datasources);
+
+  const readableFormula = replaceNamesWithCaptions(
+    column.rawFormula,
+    dependsOn,
+    parentDatasource,
+    datasources
+  );
 
   return {
     ...column,
