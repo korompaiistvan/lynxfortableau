@@ -2,14 +2,14 @@ import { WheelEvent, useState, useRef, useEffect, MouseEventHandler, useMemo } f
 import ColumnNode from "./ColumnNode";
 import { useRecoilValue } from "recoil";
 
-import { linksState, nodesStaticState } from "../state";
+import { filteredLinksState, filteredNodesState, linksState, nodesStaticState } from "../state";
 import NodeLink from "./NodeLink";
 
 type ViewBox = [number, number, number, number];
 
 function GraphCanvas() {
-  const links = useRecoilValue(linksState);
-  const nodes = useRecoilValue(nodesStaticState);
+  const links = useRecoilValue(filteredLinksState);
+  const nodes = useRecoilValue(filteredNodesState);
 
   const SVGRef = useRef<SVGSVGElement>(null);
   const [SVGBoundingBox, setSVGBoundingBox] = useState<DOMRect>();

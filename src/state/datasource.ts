@@ -8,13 +8,29 @@ export const datasourceCaptionsState = selector<string[]>({
   key: "datasource",
   get: ({ get }) => {
     const workbook = get(workbookState);
-    return workbook ? workbook.datasources.map((d) => d.caption) : [];
+    return workbook ? ["All", ...workbook.datasources.map((d) => d.caption)] : [];
   },
 });
 
 export const selectedDatasourceIdxState = atom<number>({
   key: "datasourceIdx",
-  default: 1,
+  default: 0,
+});
+
+export const selectedDatasourcesState = selector({
+  key: "selectedDatasources",
+  get: ({ get }) => {
+    const workbook = get(workbookState);
+    const datasourceCaptions = get(datasourceCaptionsState);
+    const selectedDatasourceIdx = get(selectedDatasourceIdxState);
+    const selectedDatasourceCaption = datasourceCaptions[selectedDatasourceIdx];
+
+    if (selectedDatasourceCaption === "All") {
+      return workbook ? workbook.datasources : [];
+    } else {
+      return workbook ? [workbook.datasources[selectedDatasourceIdx - 1]] : [];
+    }
+  },
 });
 
 // export const selectedDatasourceState = selector<MappedDatasource | undefined>({

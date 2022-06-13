@@ -114,11 +114,21 @@ function AppBarDrawer() {
                 />
                 <label htmlFor="raised-button-file">
                   <Button variant="contained" size="large" component="span">
-                    Upload
+                    Change workbook
                   </Button>
                 </label>
               </Box>
-              <Box sx={{ width: "100%", display: "flex" }}>
+            </Container>
+          </ThemeProvider>
+        </Collapse>
+        <AppBar position="static" elevation={appBarElevation}>
+          <Toolbar>
+            <Typography variant="h6" component="div" style={{ flex: 1 }}>
+              Lynx for Tableau
+            </Typography>
+
+            <ThemeProvider theme={darkTheme}>
+              <Box sx={{ width: "100%", display: "flex", flex: 1 }}>
                 <FormControl sx={{ flexGrow: 1 }}>
                   <InputLabel id="demo-simple-select-helper-label">Datasource</InputLabel>
                   <Select
@@ -128,6 +138,7 @@ function AppBarDrawer() {
                     label="Datasource"
                     onChange={handleDatasourceChange}
                     color="success"
+                    size="small"
                   >
                     {datasourceCaptions.map((dsn, idx) => {
                       return (
@@ -139,22 +150,15 @@ function AppBarDrawer() {
                   </Select>
                 </FormControl>
               </Box>
-            </Container>
-          </ThemeProvider>
-        </Collapse>
-        <AppBar position="static" elevation={appBarElevation}>
-          <Toolbar>
-            <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-              Lynx for Tableau
-            </Typography>
-
+            </ThemeProvider>
+            <Box sx={{ flex: 2 }} />
             <Button
               onClick={handleCollapseChange}
               endIcon={<ExpandMore />}
               color="inherit"
               // variant="outlined"
             >
-              {drawerCollapsed ? "Expand" : "Collapse"} menu
+              {drawerCollapsed ? "Show" : "Hide"} Workbook Menu
             </Button>
           </Toolbar>
         </AppBar>

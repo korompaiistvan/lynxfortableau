@@ -11,14 +11,63 @@ import {
 import { linksState } from "./linkData";
 import { nodesStaticState } from "./nodeData";
 
-import { NodeId } from "../types";
+import { MappedColumn, NodeId } from "../types";
+import { datasourceCaptionsState, selectedDatasourcesState } from "./datasource";
+
+function filterNodesForPredecessors(nodes: MappedColumn[], startingNodes: MappedColumn[]) {
+  const queue = startingNodes;
+  const visited = new Set();
+  const filteredNodes = new Set();
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+    visited.add(current.qualifiedName);
+    filteredNodes.add(current);
+    const dependees = current.dependsOn;
+
+    for (let dependee of dependees) {
+      const dependeeQualifiedName = `[${dependee.datasourceName}].${dependee.columnName}`;
+      if (visited.has(dependeeQualifiedName)) continue;
+      const dependeeNode = nodes.find((n) => n.qualifiedName === dependeeQualifiedName)!;
+      queue.push(dependeeNode);
+    }
+  }
+  return Array.from(filteredNodes) as MappedColumn[];
+}
+
+export const filteredNodesState = selector({
+  key: "filteredNodes",
+  get: ({ get }) => {
+    const nodes = get(nodesStaticState);
+    const selectedDatasources = get(selectedDatasourcesState);
+    if (!nodes) return [];
+    const filteredNodes = filterNodesForPredecessors(
+      nodes,
+      selectedDatasources.map((ds) => ds.columns).flat()
+    );
+    return filteredNodes;
+  },
+});
+
+export const filteredLinksState = selector({
+  key: "filteredLinks",
+  get: ({ get }) => {
+    const links = get(linksState);
+    const filteredNodes = get(filteredNodesState);
+
+    const filteredNodeQualifiedNames = new Set(filteredNodes.map((n) => n.qualifiedName));
+    const filteredLinks = links.filter(
+      (l) => filteredNodeQualifiedNames.has(l.start) && filteredNodeQualifiedNames.has(l.end)
+    );
+    return filteredLinks;
+  },
+});
 
 export const graphLayoutState = selector({
   key: "graphLayout",
   get: ({ get }) => {
-    const nodes = get(nodesStaticState);
+    const nodes = get(filteredNodesState);
     if (!nodes) return new dagre.graphlib.Graph();
-    const links = get(linksState);
+    const links = get(filteredLinksState);
     const hGutter = get(hGutterState);
     const vGutter = get(vGutterState);
     const margin = get(marginState);

@@ -89,8 +89,6 @@ function findDependencies(
 
   for (let dependency of foreignColumns) {
     const qualifiedName = `[${dependency.datasourceName}].${dependency.columnName}`;
-    if (column.name === "[Sales per Customer (copy)]" && dependency.datasourceName == "Parameters")
-      debugger;
     if (!strippedFormula.includes(qualifiedName)) continue;
     dependsOn.push(dependency);
   }
