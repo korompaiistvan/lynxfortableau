@@ -1,8 +1,9 @@
 import { errorSelector, selectorFamily, selector } from "recoil";
 
-import { Link, QualifiedName } from "src/types";
-
+import { qualifiedNameFromDependency } from "src/parser";
 import { nodesStaticState } from "./nodeData";
+
+import type { Link, QualifiedName } from "src/types";
 
 export const linksState = selector<Link[]>({
   key: "links",
@@ -18,7 +19,7 @@ export const linksState = selector<Link[]>({
       links = links.concat(
         node.dependsOn.map((d) => {
           idx++;
-          const dependeeQualifiedName = `[${d.datasourceName}].${d.columnName}` as QualifiedName;
+          const dependeeQualifiedName = qualifiedNameFromDependency(d) as QualifiedName;
           const dependeeNode = nodes.find((n) => n.qualifiedName === dependeeQualifiedName);
           // if (!dependeeNode) return errorSelector('could not find dependee node in graph')
           return { id: `link-${idx}`, start: dependeeNode!.qualifiedName, end: node.qualifiedName };

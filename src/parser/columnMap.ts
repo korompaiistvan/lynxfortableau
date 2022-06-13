@@ -1,20 +1,15 @@
-import {
+import type {
   Datasource,
-  Parameter,
-  SourceColumn,
   RawCalculatedColumn,
-  Column,
   RawColumn,
-  MappedDatasource,
   MappedColumn,
   Calculation,
-  RawWorkbook,
   RawDatasource,
-  Worksheet,
-  MappedWorkbook,
   ColumnDependency,
   QualifiedName,
-} from "../types";
+} from "src/types";
+
+import { qualifiedNameFromDependency } from "src/parser";
 
 export function stripJunkFromCalc(calculation: string): string {
   let cleanCalc = calculation;
@@ -52,7 +47,7 @@ export function replaceNamesWithCaptions(
         `Column ${columnName} not found in datasource ${datasource.name} while replacing names with captions`
       );
 
-    const searchName = isSiblingColumn ? `${columnName}` : `[${datasourceName}].${columnName}`;
+    const searchName = isSiblingColumn ? `${columnName}` : qualifiedNameFromDependency(dep);
     const replaceName = isSiblingColumn
       ? `[${col.caption}]`
       : `[${datasource.caption}].[${col.caption}]`;
@@ -88,7 +83,7 @@ function findDependencies(
     .flat();
 
   for (let dependency of foreignColumns) {
-    const qualifiedName = `[${dependency.datasourceName}].${dependency.columnName}`;
+    const qualifiedName = qualifiedNameFromDependency(dependency);
     if (!strippedFormula.includes(qualifiedName)) continue;
     dependsOn.push(dependency);
   }

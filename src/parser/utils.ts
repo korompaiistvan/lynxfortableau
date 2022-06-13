@@ -1,3 +1,5 @@
+import type { ColumnDependency, QualifiedName } from "src/types";
+
 export const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", "[Number of Records]"];
 
 export function evaluateXPath(
@@ -19,4 +21,8 @@ export function evaluateXPath(
   }
 
   return resultNodes;
+}
+
+export function qualifiedNameFromDependency(dependency: ColumnDependency) {
+  return `[${dependency.datasourceName}].${dependency.columnName}` as QualifiedName;
 }

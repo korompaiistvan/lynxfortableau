@@ -10,9 +10,11 @@ import {
 } from "./renderingSettings";
 import { linksState } from "./linkData";
 import { nodesStaticState } from "./nodeData";
+import { selectedDatasourcesState } from "./datasource";
 
-import { MappedColumn, NodeId } from "../types";
-import { datasourceCaptionsState, selectedDatasourcesState } from "./datasource";
+import { qualifiedNameFromDependency } from "src/parser";
+
+import type { MappedColumn, NodeId } from "../types";
 
 function filterNodesForPredecessors(nodes: MappedColumn[], startingNodes: MappedColumn[]) {
   const queue = startingNodes;
@@ -22,10 +24,10 @@ function filterNodesForPredecessors(nodes: MappedColumn[], startingNodes: Mapped
     const current = queue.pop()!;
     visited.add(current.qualifiedName);
     filteredNodes.add(current);
-    const dependees = current.dependsOn;
+    const dependencies = current.dependsOn;
 
-    for (let dependee of dependees) {
-      const dependeeQualifiedName = `[${dependee.datasourceName}].${dependee.columnName}`;
+    for (let dependency of dependencies) {
+      const dependeeQualifiedName = qualifiedNameFromDependency(dependency);
       if (visited.has(dependeeQualifiedName)) continue;
       const dependeeNode = nodes.find((n) => n.qualifiedName === dependeeQualifiedName)!;
       queue.push(dependeeNode);
