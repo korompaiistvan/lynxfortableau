@@ -20,7 +20,8 @@
     "build": "next build",
     "start": "next start",
     "export": "next export",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "postinstall": "patch-package"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +50,7 @@
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
     "jest-raw-loader": "^1.0.1",
+    "patch-package": "^6.4.7",
     "raw-loader": "^4.0.2"
   }
 }

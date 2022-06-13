@@ -18,6 +18,8 @@ import {
   stripJunkFromCalc,
 } from "..";
 
+import superstoreString from "src/Superstore.twb";
+
 describe("removes unneccessary strings from calcs", () => {
   test("line comment", () => {
     const input = "SUM([Sales]) // This is a comment at the end of the line";
