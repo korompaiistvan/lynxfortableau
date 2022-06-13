@@ -1,6 +1,10 @@
 import { MappedDatasource, MappedWorkbook, RawDatasource } from "src/types";
 import { mapRawWorkbook } from "..";
 
+import { expectedMappedDatasources } from "./helper/expectedSuperstore";
+import superstoreString from "src/Superstore.twb";
+import { convertStringToMappedWorkbook } from "../workbook";
+
 describe("maps the field dependencies accurately", () => {
   test("single datasource without parameters", () => {
     const datasource: RawDatasource = {
@@ -98,5 +102,9 @@ describe("maps the field dependencies accurately", () => {
 
     // sort columns before equality check
     expect(receivedWorkbook).toEqual(expectedWorkbook);
+  });
+  test("the Superstore workbook", () => {
+    const mappedSuperstore = convertStringToMappedWorkbook(superstoreString); // parsing tested by parser.test
+    expect(mappedSuperstore.datasources).toEqual(expectedMappedDatasources);
   });
 });

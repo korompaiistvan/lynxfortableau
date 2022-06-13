@@ -31,7 +31,7 @@ export function convertElementToCalculatedColumn(element: Element): RawCalculate
 
   const calculationNode = Array.from(element.children).find((e) => e.nodeName == "calculation");
   if (!calculationNode)
-    throw new Error(`Supplied column element ${name} has no <calculation> chlid`);
+    throw new Error(`Supplied column element ${name} has no <calculation> child`);
 
   let formula = "";
   if (calculationNode.getAttribute("class") === "categorical-bin") {

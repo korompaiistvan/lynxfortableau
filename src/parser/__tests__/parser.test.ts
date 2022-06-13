@@ -23,7 +23,7 @@ import {
 import superstoreString from "src/Superstore.twb";
 import basicWorkbookString from "./helper/basicManualWorkbook.twb";
 
-import { expectedDatasources } from "./helper/expectedSuperstore";
+import { expectedRawDatasources } from "./helper/expectedSuperstore";
 
 describe("removes unneccessary strings from calcs", () => {
   test("line comment", () => {
@@ -207,6 +207,6 @@ describe("translates datasource element into Datasource object", () => {
 describe("parses Superstore accurately", () => {
   const rawWorkbook = convertStringToRawWorkbook(superstoreString);
   test("datasources", () => {
-    expect(rawWorkbook.datasources).toEqual(expectedDatasources);
+    expect(rawWorkbook.datasources).toEqual(expectedRawDatasources);
   });
 });

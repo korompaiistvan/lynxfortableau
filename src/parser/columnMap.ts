@@ -82,13 +82,15 @@ function findDependencies(
   const foreignColumns: ColumnDependency[] = foreignDatasources
     .map((d) =>
       d.columns.map((c) => {
-        return { datasourceName: d.name, columnName: column.name };
+        return { datasourceName: d.name, columnName: c.name };
       })
     )
     .flat();
 
   for (let dependency of foreignColumns) {
-    const qualifiedName = `[${dependency.datasourceName}].[${dependency.columnName}]`;
+    const qualifiedName = `[${dependency.datasourceName}].${dependency.columnName}`;
+    if (column.name === "[Sales per Customer (copy)]" && dependency.datasourceName == "Parameters")
+      debugger;
     if (!strippedFormula.includes(qualifiedName)) continue;
     dependsOn.push(dependency);
   }
