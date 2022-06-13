@@ -1,0 +1,67 @@
+<datasource caption='Sample - Superstore' inline='true' name='federated.1uk8ts01uomc1z17rjjdj1xfe1av' version='18.1'>
+    <connection class='federated'>
+        <named-connections>
+            <named-connection caption='Sample - EU Superstore' name='excel-direct.1ma24b61n2cxsp167yev81x2rxr1'>
+            <connection class='excel-direct' cleaning='no' compat='no' dataRefreshTime='' filename='Data/Superstore/Sample - EU Superstore.xls' interpretationMode='0' password='' server='' validate='no' />
+            </named-connection>
+        </named-connections>
+        <cols>
+            <map key='[Profit]' value='[Orders].[Profit]' />
+            <map key='[Sales]' value='[Orders].[Sales]' />
+        </cols>
+        <metadata-records>
+            <metadata-record class='capability'>
+                <remote-name />
+                <remote-type>0</remote-type>
+                <parent-name>[Orders]</parent-name>
+                <remote-alias />
+                <aggregation>Count</aggregation>
+                <contains-null>true</contains-null>
+                <attributes>
+                    <attribute datatype='integer' name='context'>0</attribute>
+                    <attribute datatype='string' name='gridOrigin'>&quot;A1:T10001:no:A1:T10001:0&quot;</attribute>
+                    <attribute datatype='boolean' name='header'>true</attribute>
+                    <attribute datatype='integer' name='outcome'>6</attribute>
+                </attributes>
+            </metadata-record>
+            <metadata-record class='column'>
+                <remote-name>Sales</remote-name>
+                <remote-type>5</remote-type>
+                <local-name>[Sales]</local-name>
+                <parent-name>[Orders]</parent-name>
+                <remote-alias>Sales</remote-alias>
+                <ordinal>1</ordinal>
+                <local-type>real</local-type>
+                <aggregation>Sum</aggregation>
+                <precision>15</precision>
+                <contains-null>true</contains-null>
+                <attributes>
+                    <attribute datatype='string' name='DebugRemoteType'>&quot;R8&quot;</attribute>
+                </attributes>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Orders_562B9EED3F4F475E846CE7CDBC13B588]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+                <remote-name>Profit</remote-name>
+                <remote-type>5</remote-type>
+                <local-name>[Profit]</local-name>
+                <parent-name>[Orders]</parent-name>
+                <remote-alias>Profit</remote-alias>
+                <ordinal>2</ordinal>
+                <local-type>real</local-type>
+                <aggregation>Sum</aggregation>
+                <precision>15</precision>
+                <contains-null>true</contains-null>
+                <attributes>
+                    <attribute datatype='string' name='DebugRemoteType'>&quot;R8&quot;</attribute>
+                </attributes>
+                <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Orders_562B9EED3F4F475E846CE7CDBC13B588]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+        </metadata-records>
+    </connection>
+    <aliases enabled='yes' />
+    <column caption='Profit Ratio' datatype='real' default-format='p0%' name='[Calculation_5571209093911105]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='SUM([Profit])/SUM([Sales])' scope-isolation='false' />
+    </column>
+    <column datatype='real' default-format='c&quot;£&quot;#,##0;-&quot;£&quot;#,##0' name='[Profit]' role='measure' type='quantitative' />
+    <column datatype='real' default-format='c&quot;£&quot;#,##0;-&quot;£&quot;#,##0' name='[Sales]' role='measure' type='quantitative' />
+</datasource>

@@ -37,9 +37,14 @@ export function mapRawWorkbook(workbook: RawWorkbook): MappedWorkbook {
   };
 }
 
-export function convertStringToMappedWorkbook(xmlString: string) {
+export function convertStringToRawWorkbook(xmlString: string) {
   const wbDocument = convertStringToDocument(xmlString);
   const rawWorkbook = convertDocumentToRawWorkbook(wbDocument);
+  return rawWorkbook;
+}
+
+export function convertStringToMappedWorkbook(xmlString: string) {
+  const rawWorkbook = convertStringToRawWorkbook(xmlString);
   const mappedWorkbook = mapRawWorkbook(rawWorkbook);
   return mappedWorkbook;
 }

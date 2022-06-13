@@ -5,9 +5,10 @@ import { mapRawColumn } from "./columnMap";
 
 export function convertElementToRawDatasource(workbook: Document, element: Element): RawDatasource {
   const rawCols = getRawColumnsFromDatasourceElement(workbook, element);
+  const datasourceName = element.getAttribute("name")!;
   const datasource: RawDatasource = {
-    name: element.getAttribute("name")!,
-    caption: element.getAttribute("caption")!,
+    name: datasourceName,
+    caption: element.getAttribute("caption") ?? datasourceName,
     isColumnDependencyMapped: false,
     columns: rawCols,
   };

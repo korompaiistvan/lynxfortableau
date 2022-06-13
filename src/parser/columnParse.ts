@@ -26,8 +26,8 @@ export function convertElementToParameter(element: Element): Parameter {
 }
 
 export function convertElementToCalculatedColumn(element: Element): RawCalculatedColumn {
-  const caption = element.getAttribute("caption")!;
   const name = element.getAttribute("name")!;
+  const caption = element.getAttribute("caption") ?? name.replaceAll(/[\[|\]]/g, "");
 
   const calculationNode = Array.from(element.children).find((e) => e.nodeName == "calculation");
   if (!calculationNode)
