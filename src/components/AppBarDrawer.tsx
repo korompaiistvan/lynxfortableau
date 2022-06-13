@@ -19,7 +19,7 @@ import { Theme } from "@mui/material/styles";
 import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
 import {
   workbookStringState,
-  datasourceNamesState,
+  datasourceCaptionsState,
   selectedDatasourceIdxState,
   workbookNameState,
 } from "../state";
@@ -57,7 +57,7 @@ function AppBarDrawer() {
     setDatasourceIdx(event.target.value);
   }
 
-  const datasourceNames = useRecoilValue(datasourceNamesState);
+  const datasourceCaptions = useRecoilValue(datasourceCaptionsState);
 
   const appBarHeight = drawerCollapsed ? "auto" : "100vh";
   const appBarElevation = drawerCollapsed ? 16 : 0;
@@ -129,7 +129,7 @@ function AppBarDrawer() {
                     onChange={handleDatasourceChange}
                     color="success"
                   >
-                    {datasourceNames.map((dsn, idx) => {
+                    {datasourceCaptions.map((dsn, idx) => {
                       return (
                         <MenuItem value={idx} key={`ds${idx}`}>
                           {dsn}

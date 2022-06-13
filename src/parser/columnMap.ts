@@ -13,6 +13,7 @@ import {
   Worksheet,
   MappedWorkbook,
   ColumnDependency,
+  QualifiedName,
 } from "../types";
 
 export function stripJunkFromCalc(calculation: string): string {
@@ -38,9 +39,10 @@ export function replaceNamesWithCaptions(
 
   dependsOn.forEach((dep) => {
     const { datasourceName, columnName } = dep;
-    const datasource = datasourceName
-      ? datasources.find((d) => d.name == dep.datasourceName)
-      : parentDatasource;
+    const isSiblingColumn = datasourceName === parentDatasource.name;
+    const datasource = isSiblingColumn
+      ? parentDatasource
+      : datasources.find((d) => d.name == dep.datasourceName);
     if (!datasource)
       throw new Error(`Datasource ${datasourceName} not found while replacing names with captions`);
 
@@ -50,10 +52,10 @@ export function replaceNamesWithCaptions(
         `Column ${columnName} not found in datasource ${datasource.name} while replacing names with captions`
       );
 
-    const searchName = datasourceName ? `[${datasourceName}].${columnName}` : `${columnName}`;
-    const replaceName = datasourceName
-      ? `[${datasource.caption}].[${col.caption}]`
-      : `[${col.caption}]`;
+    const searchName = isSiblingColumn ? `${columnName}` : `[${datasourceName}].${columnName}`;
+    const replaceName = isSiblingColumn
+      ? `[${col.caption}]`
+      : `[${datasource.caption}].[${col.caption}]`;
     readableFormula = readableFormula.replaceAll(searchName, replaceName);
   });
   return readableFormula;
@@ -93,7 +95,7 @@ function findDependencies(
 
   // then look for siblings
   const siblingColumns = parentDatasource.columns.map((c) => {
-    return { columnName: c.name };
+    return { datasourceName: parentDatasource.name, columnName: c.name };
   });
   for (let dependency of siblingColumns) {
     const { columnName } = dependency;
@@ -109,7 +111,8 @@ export function mapRawColumn(
   parentDatasource: RawDatasource,
   datasources: RawDatasource[]
 ): MappedColumn {
-  if (column.type !== "calculated") return { ...column, dependsOn: [] };
+  const qualifiedName = `[${parentDatasource.name}].${column.name}` as QualifiedName;
+  if (column.type !== "calculated") return { ...column, dependsOn: [], qualifiedName };
   const dependsOn = findDependencies(column, parentDatasource, datasources);
 
   const readableFormula = replaceNamesWithCaptions(
@@ -123,5 +126,6 @@ export function mapRawColumn(
     ...column,
     dependsOn,
     readableFormula,
+    qualifiedName,
   };
 }

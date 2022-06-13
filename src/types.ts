@@ -27,15 +27,16 @@ export interface RawCalculatedColumn extends BaseColumn {
 export type RawColumn = Parameter | SourceColumn | RawCalculatedColumn;
 
 export interface ColumnDependency {
-  datasourceName?: Datasource["name"];
+  datasourceName: Datasource["name"];
   columnName: Column["name"];
 }
 
+export type QualifiedName = `[${Datasource["name"]}].${Column["name"]}`; // Column names are already surrounded by brackets
 export type MappedColumn = (
   | Parameter
   | SourceColumn
   | (RawCalculatedColumn & { readableFormula: Calculation })
-) & { dependsOn: ColumnDependency[] };
+) & { dependsOn: ColumnDependency[]; qualifiedName: QualifiedName };
 
 export type Column = RawColumn | MappedColumn;
 
@@ -73,7 +74,11 @@ export interface MappedWorkbook extends Workbook {
   datasources: MappedDatasource[];
 }
 
-export type NodeId = Column["name"];
+/////////////////////////
+// State-related types //
+/////////////////////////
+
+export type NodeId = MappedColumn["qualifiedName"];
 export type Link = { id: string; start: NodeId; end: NodeId };
 
 export interface NodeState {

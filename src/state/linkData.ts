@@ -1,6 +1,6 @@
 import { errorSelector, selectorFamily, selector } from "recoil";
 
-import { Link } from "../types";
+import { Link, QualifiedName } from "src/types";
 
 import { nodesStaticState } from "./nodeData";
 
@@ -11,12 +11,17 @@ export const linksState = selector<Link[]>({
     if (!nodes) return [];
     let links = [] as Link[];
     let idx = 0;
-    const calculatedNodes = nodes.filter((n) => n.isCalculated);
+    const calculatedNodes = nodes.filter((n) => n.type == "calculated");
+
+    // TODO: this is ugly, refactor it into something a bit more readable
     calculatedNodes.forEach((node) => {
       links = links.concat(
         node.dependsOn.map((d) => {
           idx++;
-          return { id: `link-${idx}`, start: d, end: node.name };
+          const dependeeQualifiedName = `[${d.datasourceName}].${d.columnName}` as QualifiedName;
+          const dependeeNode = nodes.find((n) => n.qualifiedName === dependeeQualifiedName);
+          // if (!dependeeNode) return errorSelector('could not find dependee node in graph')
+          return { id: `link-${idx}`, start: dependeeNode!.qualifiedName, end: node.qualifiedName };
         })
       );
     });

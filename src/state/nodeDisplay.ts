@@ -1,11 +1,6 @@
 import { atom, selectorFamily, atomFamily, errorSelector } from "recoil";
 
-import {
-  closedHeightState,
-  marginState,
-  hGutterState,
-  columnWidthState,
-} from "./renderingSettings";
+import { closedHeightState, columnWidthState } from "./renderingSettings";
 import { guardRecoilDefaultValue } from "./utils";
 import { nodesAboveSelector, xBasePositionSelector, yBasePositionSelector } from "./graphLayout";
 
@@ -75,7 +70,6 @@ export const openHeightSelector = selectorFamily<number, NodeId>({
       if (guardRecoilDefaultValue(newOpenHeight)) {
         return errorSelector("reset is not implemented on this selector");
       }
-
       return set(nodesDynamicStateFamily(nodeId), (prevState) => ({
         ...prevState,
         openHeight: newOpenHeight,

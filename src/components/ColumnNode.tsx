@@ -3,7 +3,7 @@ import { ExpandMore } from "@mui/icons-material";
 import { useRef, Fragment } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
 
-import { isCalculatedColumn, isParameterColumn, isSourceColumn, MappedColumn } from "../types";
+import { MappedColumn } from "../types";
 import {
   closedHeightState,
   isClosedSelector,
@@ -15,7 +15,7 @@ import {
 } from "../state";
 
 function ColumnNode(props: MappedColumn) {
-  const nodeId = props.name;
+  const nodeId = props.qualifiedName;
   const closedHeight = useRecoilValue(closedHeightState);
   const width = useRecoilValue(nodeWidthSelector(nodeId));
   const xPosition = useRecoilValue(xPositionSelector(nodeId));
@@ -39,6 +39,32 @@ function ColumnNode(props: MappedColumn) {
     setOpenHeight(selfRef.current.offsetHeight);
   }
 
+  const cardDetails = () => {
+    switch (props.type) {
+      case "calculated":
+        return (
+          <Fragment>
+            <Typography style={{ fontFamily: "JetBrains Mono" }}>
+              <b>Calculation</b>
+            </Typography>
+            <pre style={{ fontSize: "9pt", overflowX: "auto" }}>
+              <code>{props.readableFormula}</code>
+            </pre>
+          </Fragment>
+        );
+      case "source":
+        return (
+          <Typography paragraph>
+            <b>Source table:</b> {props.sourceTable}
+          </Typography>
+        );
+      case "parameter":
+        <Typography paragraph>
+          <b>Parameter</b>
+        </Typography>;
+    }
+  };
+
   return (
     <foreignObject
       x={xPosition}
@@ -56,7 +82,7 @@ function ColumnNode(props: MappedColumn) {
           minHeight: `${closedHeight}px`,
         }}
         ref={selfRef}
-        onMouseEnter={() => setHighlightedNodeId(props.name)}
+        onMouseEnter={() => setHighlightedNodeId(nodeId)}
         onMouseLeave={() => resetHighlightedNodeId()}
       >
         <CardHeader
@@ -73,29 +99,7 @@ function ColumnNode(props: MappedColumn) {
           }
         />
         <Collapse in={!isClosed} onEntered={updateOpenHeight}>
-          <CardContent>
-            {/* {props.calculated ? props.syntax : props.sourceTable} */}
-            {isCalculatedColumn(props) && (
-              <Fragment>
-                <Typography style={{ fontFamily: "JetBrains Mono" }}>
-                  <b>Calculation</b>
-                </Typography>
-                <pre style={{ fontSize: "9pt", overflowX: "auto" }}>
-                  <code>{props.calculation}</code>
-                </pre>
-              </Fragment>
-            )}
-            {isSourceColumn(props) && (
-              <Typography paragraph>
-                <b>Source table:</b> {props.sourceTable}
-              </Typography>
-            )}
-            {isParameterColumn(props) && (
-              <Typography paragraph>
-                <b>Parameter</b>
-              </Typography>
-            )}
-          </CardContent>
+          <CardContent>{cardDetails()}</CardContent>
         </Collapse>
       </Card>
     </foreignObject>

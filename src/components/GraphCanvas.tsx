@@ -86,7 +86,7 @@ function GraphCanvas() {
 
   const nodeChildren = useMemo(() => {
     return nodes?.map((col, idx) => {
-      return <ColumnNode {...col} key={col.name} />;
+      return <ColumnNode {...col} key={col.qualifiedName} />;
     });
   }, [nodes]);
 

@@ -1,34 +1,14 @@
 import { atom, errorSelector, selector } from "recoil";
 
-import { workbookStringState } from "./workbook";
+import { workbookState } from "./workbook";
 
 import { MappedDatasource } from "../types";
 
-import {
-  getDatasourcesFromWorkbook,
-  populateColumnDependencies,
-} from "../parser/TableauWorkbookParser";
-
-export const datasourcesState = selector<MappedDatasource[] | undefined>({
-  key: "datasources",
+export const datasourceCaptionsState = selector<string[]>({
+  key: "datasource",
   get: ({ get }) => {
-    const workbookStr = get(workbookStringState);
-    if (!workbookStr) return;
-
-    const datasources = getDatasourcesFromWorkbook(workbookStr).map((ds) =>
-      populateColumnDependencies(ds)
-    );
-
-    return datasources;
-  },
-});
-
-export const datasourceNamesState = selector<string[]>({
-  key: "datasourceNames",
-  get: ({ get }) => {
-    const datasources = get(datasourcesState);
-    if (!datasources) return [];
-    return datasources?.map((ds) => ds.caption);
+    const workbook = get(workbookState);
+    return workbook ? workbook.datasources.map((d) => d.caption) : [];
   },
 });
 
@@ -37,16 +17,16 @@ export const selectedDatasourceIdxState = atom<number>({
   default: 1,
 });
 
-export const selectedDatasourceState = selector<MappedDatasource | undefined>({
-  key: "selectedDatasource",
-  get: ({ get }) => {
-    const datasourceIdx = get(selectedDatasourceIdxState);
-    const datasources = get(datasourcesState);
-    if (!datasources) return;
+// export const selectedDatasourceState = selector<MappedDatasource | undefined>({
+//   key: "selectedDatasource",
+//   get: ({ get }) => {
+//     const datasourceIdx = get(selectedDatasourceIdxState);
+//     const workbook = get(workbookState);
+//     if (!workbook) return;
 
-    if (datasourceIdx >= datasources.length) {
-      return errorSelector(`datasourceIdx ${datasourceIdx} out of bounds`);
-    }
-    return datasources[datasourceIdx];
-  },
-});
+//     if (datasourceIdx >= workbook.datasources.length) {
+//       return errorSelector(`datasourceIdx ${datasourceIdx} out of bounds`);
+//     }
+//     return workbook.datasources[datasourceIdx];
+//   },
+// });

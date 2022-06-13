@@ -21,27 +21,32 @@ export const graphLayoutState = selector({
     const links = get(linksState);
     const hGutter = get(hGutterState);
     const vGutter = get(vGutterState);
+    const margin = get(marginState);
     const columnWidth = get(columnWidthState);
     const closedHeight = get(closedHeightState);
 
     // this is an easy way to get a nice layout from dagre
     const graph = new dagre.graphlib.Graph();
-    graph.setGraph({ ranker: "longest-path", ranksep: hGutter, nodesep: vGutter, rankdir: "RL" });
+    graph.setGraph({
+      ranker: "longest-path",
+      ranksep: hGutter,
+      nodesep: vGutter,
+      rankdir: "RL",
+      marginx: margin,
+      marginy: margin,
+    });
     graph.setDefaultEdgeLabel(function () {
       return {};
     });
     nodes.forEach((nd) =>
-      graph.setNode(nd.name, { width: columnWidth, height: closedHeight, label: nd.name })
+      graph.setNode(nd.qualifiedName, {
+        width: columnWidth,
+        height: closedHeight,
+        label: nd.qualifiedName,
+      })
     );
     links.forEach((eg) => graph.setEdge(eg.end, eg.start)); //edge direction are flipped on purpose
     dagre.layout(graph);
-
-    // let yPositions = new Map(
-    //   nodes.map((n) => {
-    //     const layoutNode = graph.node(n.name);
-    //     return [n.name, margin + layoutNode.y - layoutNode.height / 2];
-    //   })
-    // );
 
     return graph;
   },
@@ -61,6 +66,7 @@ export const xBasePositionSelector = selectorFamily({
     (nodeId: NodeId) =>
     ({ get }) => {
       const graphNode = get(graphLayoutState).node(nodeId);
+      if (!graphNode) return errorSelector(`Could not find ${nodeId} in graph`);
       const xBasePosition = graphNode.x;
       if (xBasePosition === undefined)
         return errorSelector(`the node id ${nodeId} does not exist in the graph layout`);
@@ -97,13 +103,12 @@ export const nodesAboveSelector = selectorFamily<NodeId[], NodeId>({
     (nodeId) =>
     ({ get }) => {
       const nodeX = get(xBasePositionSelector(nodeId));
+      const nodeY = get(yBasePositionSelector(nodeId));
       const columnNodes = get(nodesOfSameColumnSelector(nodeX));
 
-      const nodeY = get(yBasePositionSelector(nodeId));
-
       const nodesAbove = columnNodes
-        .filter((node) => get(yBasePositionSelector(node.label!)) < nodeY)
-        .map((n) => n.label!);
+        .filter((node) => get(yBasePositionSelector(node.label! as NodeId)) < nodeY)
+        .map((n) => n.label! as NodeId);
       return nodesAbove;
     },
 });

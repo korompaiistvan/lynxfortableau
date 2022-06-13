@@ -267,7 +267,7 @@ describe("translates datasource element into Datasource object", () => {
 });
 
 describe("maps the field dependencies accurately", () => {
-  test("singe datasource without parameters", () => {
+  test("single datasource without parameters", () => {
     const datasource: RawDatasource = {
       caption: "Best DS ever",
       name: "federated_kljbasoidhfoiuabef",
@@ -311,6 +311,7 @@ describe("maps the field dependencies accurately", () => {
           name: "[source_column_a]",
           sourceTable: "Actually not sure",
           dependsOn: [],
+          qualifiedName: "[federated_kljbasoidhfoiuabef].[source_column_a]",
         },
         {
           type: "source",
@@ -318,6 +319,7 @@ describe("maps the field dependencies accurately", () => {
           name: "[source_column_b]",
           sourceTable: "Actually not sure",
           dependsOn: [],
+          qualifiedName: "[federated_kljbasoidhfoiuabef].[source_column_b]",
         },
         {
           type: "calculated",
@@ -326,7 +328,11 @@ describe("maps the field dependencies accurately", () => {
           rawFormula: "[source_column_a] + [source_column_b]",
           readableFormula: "[Source Col A] + [Source Col B]",
           // dependsOn: [expectedColumns[0], expectedColumns[1]],
-          dependsOn: [{ columnName: "[source_column_a]" }, { columnName: "[source_column_b]" }],
+          dependsOn: [
+            { datasourceName: "federated_kljbasoidhfoiuabef", columnName: "[source_column_a]" },
+            { datasourceName: "federated_kljbasoidhfoiuabef", columnName: "[source_column_b]" },
+          ],
+          qualifiedName: "[federated_kljbasoidhfoiuabef].[level_1_calc]",
         },
         {
           type: "calculated",
@@ -335,7 +341,11 @@ describe("maps the field dependencies accurately", () => {
           rawFormula: "[level_1_calc] + [source_column_b]",
           readableFormula: "[1st level Calc] + [Source Col B]",
           // dependsOn: [expectedColumns[1], expectedColumns[2]],
-          dependsOn: [{ columnName: "[source_column_b]" }, { columnName: "[level_1_calc]" }],
+          dependsOn: [
+            { datasourceName: "federated_kljbasoidhfoiuabef", columnName: "[source_column_b]" },
+            { datasourceName: "federated_kljbasoidhfoiuabef", columnName: "[level_1_calc]" },
+          ],
+          qualifiedName: "[federated_kljbasoidhfoiuabef].[level_2_calc]",
         },
       ],
     };
