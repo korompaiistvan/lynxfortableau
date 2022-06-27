@@ -85,3 +85,5 @@ export interface NodeState {
   isClosed: boolean;
   openHeight: number;
 }
+
+export type ViewBox = [number, number, number, number];

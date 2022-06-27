@@ -3,7 +3,7 @@ import { ExpandMore } from "@mui/icons-material";
 import { useRef, Fragment } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
 
-import { MappedColumn } from "../types";
+import { MappedColumn } from "src/types";
 import {
   closedHeightState,
   isClosedSelector,
@@ -12,7 +12,7 @@ import {
   yPositionSelector,
   nodeWidthSelector,
   highlightedNodeIdState,
-} from "../state";
+} from "src/state";
 
 function ColumnNode(props: MappedColumn) {
   const nodeId = props.qualifiedName;

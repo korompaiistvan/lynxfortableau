@@ -1,5 +1,5 @@
 import { Fragment, StrictMode } from "react";
-import GraphCanvas from "./GraphCanvas";
+import GraphCanvas from "../GraphCanvas/GraphCanvas";
 import AppBarDrawer from "./TopDrawer";
 
 function App() {

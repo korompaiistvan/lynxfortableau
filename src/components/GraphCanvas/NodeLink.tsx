@@ -1,4 +1,4 @@
-import { linkDisplayState } from "../state";
+import { linkDisplayState } from "../../state";
 import { useRecoilValue } from "recoil";
 import { memo } from "react";
 
