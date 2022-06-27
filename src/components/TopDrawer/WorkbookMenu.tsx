@@ -2,6 +2,7 @@
 import { Box, Button, Collapse, Container, TextField } from "@mui/material";
 import { Theme, ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction } from "react";
+import { readWorkbookFromTwbx } from "src/parser/utils";
 import { darkTheme } from "src/theme";
 
 // state
@@ -24,7 +25,13 @@ export default function WorkbookMenu(props: Props) {
     const file = event.target.files![0];
     setWorkbookName(file.name);
     resetDatasourceIdx();
-    file.text().then((workbookString) => {
+    let stringPromise;
+    if (file.type === "application/twbx") {
+      stringPromise = readWorkbookFromTwbx(file);
+    } else {
+      stringPromise = file.text();
+    }
+    stringPromise.then((workbookString) => {
       setWorkbookString(workbookString);
       setDrawerCollapsed(true);
     });
@@ -64,7 +71,7 @@ export default function WorkbookMenu(props: Props) {
               }}
             />
             <input
-              accept=".twb"
+              accept=".twb,.twbx"
               hidden
               id="raised-button-file"
               multiple={false}
