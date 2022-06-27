@@ -1,3 +1,6 @@
+// external
+import * as zip from "@zip.js/zip.js";
+
 // types
 import type { ColumnDependency, QualifiedName } from "src/types";
 
@@ -26,4 +29,18 @@ export function evaluateXPath(
 
 export function qualifiedNameFromDependency(dependency: ColumnDependency) {
   return `[${dependency.datasourceName}].${dependency.columnName}` as QualifiedName;
+}
+
+export async function readWorkbookFromTwbx(twbx: File) {
+  const reader = new zip.ZipReader(new zip.BlobReader(twbx));
+  const entries = await reader.getEntries();
+
+  if (entries.length === 0) throw new Error("There are no entries in this file");
+
+  const twbEntry = entries.find((e) => e.filename.match(/\.twb$/) !== null);
+  if (!twbEntry) throw new Error("No twb found in twbx");
+
+  const workbookStr = await twbEntry.getData!(new zip.TextWriter());
+  await reader.close();
+  return workbookStr;
 }

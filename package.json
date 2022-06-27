@@ -8,6 +8,7 @@
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
     "@types/dagre": "^0.7.47",
+    "@zip.js/zip.js": "^2.4.20",
     "dagre": "^0.8.5",
     "next": "^12.1.4",
     "react": "^18.0.0",
