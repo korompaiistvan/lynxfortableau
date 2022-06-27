@@ -1,12 +1,17 @@
+import { StrictMode } from "react";
 import { RecoilRoot } from "recoil";
-// disable SSR on the top level
+
 import dynamic from "next/dynamic";
-const App = dynamic(() => import("../components/App"), { ssr: false });
+const GraphCanvas = dynamic(() => import("src/components/GraphCanvas"), { ssr: false });
+const TopDrawer = dynamic(() => import("src/components/TopDrawer"), { ssr: false });
 
 function Main() {
   return (
     <RecoilRoot>
-      <App />
+      <StrictMode>
+        <GraphCanvas />
+        <TopDrawer />
+      </StrictMode>
     </RecoilRoot>
   );
 }
