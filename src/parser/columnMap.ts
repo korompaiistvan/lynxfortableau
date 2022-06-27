@@ -1,15 +1,17 @@
+// local
+import { qualifiedNameFromDependency } from "./utils";
+
+// types
 import type {
+  Calculation,
+  ColumnDependency,
   Datasource,
+  MappedColumn,
+  QualifiedName,
   RawCalculatedColumn,
   RawColumn,
-  MappedColumn,
-  Calculation,
   RawDatasource,
-  ColumnDependency,
-  QualifiedName,
 } from "src/types";
-
-import { qualifiedNameFromDependency } from "src/parser";
 
 export function stripJunkFromCalc(calculation: string): string {
   let cleanCalc = calculation;

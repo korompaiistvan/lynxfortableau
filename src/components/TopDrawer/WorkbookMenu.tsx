@@ -1,19 +1,19 @@
-import { Button, Box, Collapse, Container, TextField } from "@mui/material";
-
-import { ThemeProvider, Theme } from "@mui/material/styles";
-
+// external
+import { Box, Button, Collapse, Container, TextField } from "@mui/material";
+import { Theme, ThemeProvider } from "@mui/material/styles";
+import { Dispatch, SetStateAction } from "react";
 import { darkTheme } from "src/theme";
 
-import { workbookStringState, selectedDatasourceIdxState, workbookNameState } from "src/state";
-import { useSetRecoilState, useResetRecoilState, useRecoilState } from "recoil";
-import { Dispatch, SetStateAction } from "react";
+// state
+import { useRecoilState, useResetRecoilState, useSetRecoilState } from "recoil";
+import { selectedDatasourceIdxState, workbookNameState, workbookStringState } from "src/state";
 
 interface Props {
   drawerCollapsed: boolean;
   setDrawerCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 
-export function WorkbookMenu(props: Props) {
+export default function WorkbookMenu(props: Props) {
   const { drawerCollapsed, setDrawerCollapsed } = props;
 
   const [workbookName, setWorkbookName] = useRecoilState(workbookNameState);

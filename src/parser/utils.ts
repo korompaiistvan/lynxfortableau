@@ -1,3 +1,4 @@
+// types
 import type { ColumnDependency, QualifiedName } from "src/types";
 
 export const DISCARDED_COLUMN_NAMES = ["[:Measure Names]", "[Number of Records]"];

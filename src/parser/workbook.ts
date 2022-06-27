@@ -1,4 +1,11 @@
-import { RawWorkbook, RawDatasource, MappedDatasource, Worksheet, MappedWorkbook } from "../types";
+// types
+import type {
+  MappedDatasource,
+  MappedWorkbook,
+  RawDatasource,
+  RawWorkbook,
+  Worksheet,
+} from "../types";
 
 import { convertElementToRawDatasource, mapDatasource } from "./datasource";
 import { evaluateXPath } from "./utils";

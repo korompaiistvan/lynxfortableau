@@ -1,8 +1,9 @@
+// types
 import type {
   Dispatch,
-  SetStateAction,
   MouseEventHandler,
   RefObject,
+  SetStateAction,
   WheelEventHandler,
 } from "react";
 import type { ViewBox } from "src/types";

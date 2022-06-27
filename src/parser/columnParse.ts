@@ -1,19 +1,8 @@
-import {
-  Datasource,
-  Parameter,
-  SourceColumn,
-  RawCalculatedColumn,
-  RawColumn,
-  MappedDatasource,
-  MappedColumn,
-  Calculation,
-  RawWorkbook,
-  RawDatasource,
-  Worksheet,
-  MappedWorkbook,
-} from "../types";
+// local
+import { DISCARDED_COLUMN_NAMES, evaluateXPath } from "./utils";
 
-import { evaluateXPath, DISCARDED_COLUMN_NAMES } from "./utils";
+// types
+import type { Parameter, RawCalculatedColumn, RawColumn, SourceColumn } from "../types";
 
 export function convertElementToParameter(element: Element): Parameter {
   const caption = element.getAttribute("caption")!;

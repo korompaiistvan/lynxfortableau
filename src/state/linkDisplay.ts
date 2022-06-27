@@ -1,11 +1,14 @@
+// external
 import { selectorFamily } from "recoil";
+
+// local / state
+import { linkStaticState } from "./linkData";
 import {
+  highlightedNodeIdState,
+  nodeHeightSelector,
   xPositionSelector,
   yPositionSelector,
-  nodeHeightSelector,
-  highlightedNodeIdState,
 } from "./nodeDisplay";
-import { linkStaticState } from "./linkData";
 import { columnWidthState } from "./renderingSettings";
 
 export const isLinkHighlightedSelector = selectorFamily({

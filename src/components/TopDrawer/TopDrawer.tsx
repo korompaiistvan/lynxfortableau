@@ -1,9 +1,12 @@
-import { CommandBar } from "./AppBar";
-import { WorkbookMenu } from "./WorkbookMenu";
-import { useState } from "react";
+// external
 import { Box } from "@mui/material";
+import { useState } from "react";
 
-function TopDrawer() {
+// local
+import CommandBar from "./CommandBar";
+import WorkbookMenu from "./WorkbookMenu";
+
+export default function TopDrawer() {
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
   const appBarHeight = drawerCollapsed ? "auto" : "100vh";
 
@@ -24,5 +27,3 @@ function TopDrawer() {
     </Box>
   );
 }
-
-export default TopDrawer;

@@ -1,8 +1,11 @@
-import { errorSelector, selectorFamily, selector } from "recoil";
-
+// external
 import { qualifiedNameFromDependency } from "src/parser";
+
+// local / state
+import { errorSelector, selector, selectorFamily } from "recoil";
 import { nodesStaticState } from "./nodeData";
 
+// types
 import type { Link, QualifiedName } from "src/types";
 
 export const linksState = selector<Link[]>({

@@ -1,10 +1,11 @@
-import { atom, selectorFamily, atomFamily, errorSelector } from "recoil";
-
+// local / state
+import { atom, atomFamily, errorSelector, selectorFamily } from "recoil";
+import { nodesAboveSelector, xBasePositionSelector, yBasePositionSelector } from "./graphLayout";
 import { closedHeightState, columnWidthState } from "./renderingSettings";
 import { guardRecoilDefaultValue } from "./utils";
-import { nodesAboveSelector, xBasePositionSelector, yBasePositionSelector } from "./graphLayout";
 
-import { NodeId, NodeState } from "../types";
+// types
+import type { NodeId, NodeState } from "../types";
 
 export const nodesDynamicStateFamily = atomFamily<NodeState, NodeId>({
   key: "nodeState",

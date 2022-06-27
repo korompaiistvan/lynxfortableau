@@ -1,8 +1,9 @@
+// local / state
 import { selector } from "recoil";
-
 import { workbookState } from "./workbook";
 
-import { MappedColumn } from "../types";
+// type
+import type { MappedColumn } from "../types";
 
 export const nodesStaticState = selector<MappedColumn[] | undefined>({
   key: "nodesStatic",

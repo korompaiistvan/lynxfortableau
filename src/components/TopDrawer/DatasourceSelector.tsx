@@ -1,10 +1,11 @@
-import { darkTheme } from "src/theme";
+// external
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-
 import { ThemeProvider } from "@mui/material/styles";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { darkTheme } from "src/theme";
 
+// state
 import { datasourceCaptionsState, selectedDatasourceIdxState } from "src/state";
-import { useRecoilValue, useRecoilState } from "recoil";
 
 export function DatasourceSelector() {
   const datasourceCaptions = useRecoilValue(datasourceCaptionsState);

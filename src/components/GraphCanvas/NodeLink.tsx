@@ -1,6 +1,9 @@
-import { linkDisplayState } from "../../state";
-import { useRecoilValue } from "recoil";
+// external
 import { memo } from "react";
+
+// state
+import { useRecoilValue } from "recoil";
+import { linkDisplayState } from "src/state";
 
 interface Props {
   id: string;

@@ -1,18 +1,22 @@
-import { Card, CardContent, Collapse, Typography, CardHeader, IconButton } from "@mui/material";
+// external
 import { ExpandMore } from "@mui/icons-material";
-import { useRef, Fragment } from "react";
-import { useRecoilValue, useSetRecoilState, useRecoilState, useResetRecoilState } from "recoil";
+import { Card, CardContent, CardHeader, Collapse, IconButton, Typography } from "@mui/material";
+import { Fragment, useRef } from "react";
 
-import { MappedColumn } from "src/types";
+// state
+import { useRecoilState, useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil";
 import {
   closedHeightState,
+  highlightedNodeIdState,
   isClosedSelector,
+  nodeWidthSelector,
   openHeightSelector,
   xPositionSelector,
-  yPositionSelector,
-  nodeWidthSelector,
-  highlightedNodeIdState,
+  yPositionSelector
 } from "src/state";
+
+// types
+import { MappedColumn } from "src/types";
 
 function ColumnNode(props: MappedColumn) {
   const nodeId = props.qualifiedName;

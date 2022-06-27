@@ -1,19 +1,21 @@
-import { atom, selector, selectorFamily, errorSelector } from "recoil";
+// external
 import * as dagre from "dagre";
-
-import {
-  columnWidthState,
-  hGutterState,
-  vGutterState,
-  closedHeightState,
-  marginState,
-} from "./renderingSettings";
-import { linksState } from "./linkData";
-import { nodesStaticState } from "./nodeData";
-import { selectedDatasourcesState } from "./datasource";
-
 import { qualifiedNameFromDependency } from "src/parser";
 
+// local / state
+import { errorSelector, selector, selectorFamily } from "recoil";
+import { selectedDatasourcesState } from "./datasource";
+import { linksState } from "./linkData";
+import { nodesStaticState } from "./nodeData";
+import {
+  closedHeightState,
+  columnWidthState,
+  hGutterState,
+  marginState,
+  vGutterState,
+} from "./renderingSettings";
+
+// types
 import type { MappedColumn, NodeId } from "../types";
 
 function filterNodesForPredecessors(nodes: MappedColumn[], startingNodes: MappedColumn[]) {

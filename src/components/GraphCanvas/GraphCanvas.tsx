@@ -1,11 +1,16 @@
-import { WheelEvent, useState, useRef, useEffect, MouseEventHandler, useMemo } from "react";
-import ColumnNode from "./ColumnNode";
+// external
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 
-import { filteredLinksState, filteredNodesState, linksState, nodesStaticState } from "src/state";
+// local
+import ColumnNode from "./ColumnNode";
+import { endPan, handlePan, handleZoom, startPan } from "./navigationEventHandlers";
 import NodeLink from "./NodeLink";
-import { handleZoom, startPan, endPan, handlePan } from "./navigationEventHandlers";
 
+// state
+import { filteredLinksState, filteredNodesState } from "src/state";
+
+// types
 import type { ViewBox } from "src/types";
 
 function GraphCanvas() {

@@ -1,7 +1,9 @@
-import { MappedDatasource, MappedColumn, RawWorkbook, RawDatasource } from "../types";
-
-import { getRawColumnsFromDatasourceElement } from "./columnParse";
+// local
 import { mapRawColumn } from "./columnMap";
+import { getRawColumnsFromDatasourceElement } from "./columnParse";
+
+// types
+import type { MappedColumn, MappedDatasource, RawDatasource, RawWorkbook } from "../types";
 
 export function convertElementToRawDatasource(workbook: Document, element: Element): RawDatasource {
   const rawCols = getRawColumnsFromDatasourceElement(workbook, element);

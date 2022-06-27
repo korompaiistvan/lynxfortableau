@@ -1,8 +1,6 @@
-import { atom, errorSelector, selector } from "recoil";
-
+// local / state
+import { atom, selector } from "recoil";
 import { workbookState } from "./workbook";
-
-import { MappedDatasource } from "../types";
 
 export const datasourceCaptionsState = selector<string[]>({
   key: "datasource",
