@@ -8,7 +8,7 @@
 		// Append -bullseye or -buster to pin to an OS version.
 		// Use -bullseye variants on local on arm64/Apple Silicon.
 		"args": { 
-			"VARIANT": "16"
+			"VARIANT": "18"
 		}
 	},
 
@@ -20,7 +20,8 @@
 	"extensions": [
 		"dbaeumer.vscode-eslint",
 		"esbenp.prettier-vscode",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"Orta.vscode-jest"
 	],
 	"mounts": [
 		"type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly"

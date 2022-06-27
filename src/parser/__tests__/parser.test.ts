@@ -1,24 +1,15 @@
-import {
-  Datasource,
-  MappedColumn,
-  MappedDatasource,
-  MappedWorkbook,
-  Parameter,
-  RawCalculatedColumn,
-  RawDatasource,
-  RawWorkbook,
-  SourceColumn,
-} from "src/types";
+// local
 import {
   convertElementToCalculatedColumn,
-  convertElementToRawDatasource,
   convertElementToParameter,
+  convertElementToRawDatasource,
   convertElementToSourceColumn,
-  mapRawColumn,
-  mapRawWorkbook,
-  stripJunkFromCalc,
   convertStringToRawWorkbook,
+  stripJunkFromCalc,
 } from "..";
+
+// types
+import { Parameter, RawCalculatedColumn, RawDatasource, SourceColumn } from "src/types";
 
 import superstoreString from "src/Superstore.twb";
 import basicWorkbookString from "./helper/basicManualWorkbook.twb";

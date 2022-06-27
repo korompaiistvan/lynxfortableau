@@ -8,5 +8,7 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
         }        
-    }
+    },
+    "jest.jestCommandLine": "npm run test --config=jest.config.js --",
+    "jest.autoRun": {"watch": false}
 }

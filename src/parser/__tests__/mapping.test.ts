@@ -1,9 +1,12 @@
-import { MappedDatasource, MappedWorkbook, RawDatasource } from "src/types";
-import { mapRawWorkbook } from "..";
-
-import { expectedMappedDatasources } from "./helper/expectedSuperstore";
+// external
 import superstoreString from "src/Superstore.twb";
-import { convertStringToMappedWorkbook } from "../workbook";
+
+// local
+import { convertStringToMappedWorkbook, mapRawWorkbook } from "..";
+import { expectedMappedDatasources } from "./helper/expectedSuperstore";
+
+// types
+import { MappedDatasource, MappedWorkbook, RawDatasource } from "src/types";
 
 describe("maps the field dependencies accurately", () => {
   test("single datasource without parameters", () => {

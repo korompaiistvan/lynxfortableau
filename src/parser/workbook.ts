@@ -1,3 +1,7 @@
+// local
+import { convertElementToRawDatasource, mapDatasource } from "./datasource";
+import { evaluateXPath } from "./utils";
+
 // types
 import type {
   MappedDatasource,
@@ -6,9 +10,6 @@ import type {
   RawWorkbook,
   Worksheet,
 } from "../types";
-
-import { convertElementToRawDatasource, mapDatasource } from "./datasource";
-import { evaluateXPath } from "./utils";
 
 function convertStringToDocument(xmlString: string) {
   const parser = new DOMParser();
