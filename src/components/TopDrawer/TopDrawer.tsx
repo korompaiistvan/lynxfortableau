@@ -22,7 +22,7 @@ import {
   datasourceCaptionsState,
   selectedDatasourceIdxState,
   workbookNameState,
-} from "../state";
+} from "src/state";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
@@ -32,7 +32,7 @@ const darkTheme = createTheme({
   },
 });
 
-function AppBarDrawer() {
+function TopDrawer() {
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
 
   const setWorkbookString = useSetRecoilState(workbookStringState);
@@ -167,4 +167,4 @@ function AppBarDrawer() {
   );
 }
 
-export default AppBarDrawer;
+export default TopDrawer;
