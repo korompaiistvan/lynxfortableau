@@ -25,12 +25,8 @@ export default function WorkbookMenu(props: Props) {
     const file = event.target.files![0];
     setWorkbookName(file.name);
     resetDatasourceIdx();
-    let stringPromise;
-    if (file.type === "application/twbx") {
-      stringPromise = readWorkbookFromTwbx(file);
-    } else {
-      stringPromise = file.text();
-    }
+    const stringPromise =
+      file.type === "application/twbx" ? readWorkbookFromTwbx(file) : file.text();
     stringPromise.then((workbookString) => {
       setWorkbookString(workbookString);
       setDrawerCollapsed(true);
