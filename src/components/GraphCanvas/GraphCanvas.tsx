@@ -8,7 +8,7 @@ import { endPan, handlePan, handleZoom, startPan } from "./navigationEventHandle
 import NodeLink from "./NodeLink";
 
 // state
-import { filteredLinksState, filteredNodesState } from "src/state";
+import { filteredLinksState, filteredNodesState, workbookNameState } from "src/state";
 
 // types
 import type { ViewBox } from "src/types";
@@ -22,6 +22,7 @@ function GraphCanvas() {
   const [viewBox, setViewBox] = useState<ViewBox>([0, 0, 4000, 2000]);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [pointerOrigin, setPointerOrigin] = useState<DOMPoint>();
+  const workbookName = useRecoilValue(workbookNameState);
 
   // holds the timer for setTimeout and clearInterval
   let movement_timer: NodeJS.Timeout | undefined = undefined;
@@ -42,16 +43,15 @@ function GraphCanvas() {
 
   const nodeChildren = useMemo(() => {
     return nodes?.map((col, idx) => {
-      return <ColumnNode {...col} key={col.qualifiedName} />;
+      return <ColumnNode {...col} key={`${workbookName}.${col.qualifiedName}`} />;
     });
-  }, [nodes]);
+  }, [workbookName, nodes]);
 
   const linkChildren = useMemo(() => {
     return links.map((link, idx) => {
       return <NodeLink id={link.id} key={link.id} />;
     });
   }, [links]);
-
   return (
     <svg
       viewBox={viewBox.join(" ")}
