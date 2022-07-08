@@ -75,10 +75,11 @@ function getMetadataOnlySourceColumns(
     (metadataRecord) => {
       const sourceTable = evaluateXPath(workbook, "./parent-name", metadataRecord)[0].textContent!;
       const name = evaluateXPath(workbook, "./local-name", metadataRecord)[0].textContent!;
+      const nameWithoutBrackets = name.replace(/\[|\]/g, "");
 
       return {
-        caption: name.replaceAll(/[\[\]]/g, ""), // not necessarily the case, but a rename is not captured in the metadata record
-        name: name,
+        caption: nameWithoutBrackets, // not necessarily the case, but a rename is not captured in the metadata record
+        name: nameWithoutBrackets,
         sourceTable: sourceTable,
         type: "source",
       };
@@ -96,7 +97,10 @@ export function getRawColumnsFromDatasourceElement(
   datasource: Element
 ): Array<RawColumn> {
   const dsIsParameters = datasource.getAttribute("name") === "Parameters";
-  const columnElements = evaluateXPath(workbook, "./column", datasource).filter(
+  // the xpath is a bit complicated because tableau duplicates stuff
+  const columnXpath =
+    ".//column[not(ancestor::*[starts-with(name(), '_.fcp.ObjectModelEncapsulateLegacy.true')])]";
+  const columnElements = evaluateXPath(workbook, columnXpath, datasource).filter(
     (c) => !DISCARDED_COLUMN_NAMES.includes(c.getAttribute("name")!)
   );
 
