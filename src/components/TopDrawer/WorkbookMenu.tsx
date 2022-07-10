@@ -3,11 +3,12 @@ import { Box, Button, Collapse, Container, TextField } from "@mui/material";
 import { Theme, ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction } from "react";
 import { readWorkbookFromTwbx } from "src/parser/utils";
+import { storeWorkbook } from "src/storageClient";
 import { darkTheme } from "src/theme";
 
 // state
-import { useRecoilState, useResetRecoilState, useSetRecoilState } from "recoil";
-import { selectedDatasourceIdxState, workbookNameState, workbookStringState } from "src/state";
+import { useRecoilState, useResetRecoilState } from "recoil";
+import { selectedDatasourceIdxState, workbookNameState } from "src/state";
 
 interface Props {
   drawerCollapsed: boolean;
@@ -19,16 +20,18 @@ export default function WorkbookMenu(props: Props) {
 
   const [workbookName, setWorkbookName] = useRecoilState(workbookNameState);
   const resetDatasourceIdx = useResetRecoilState(selectedDatasourceIdxState);
-  const setWorkbookString = useSetRecoilState(workbookStringState);
 
   function handleWorkbookChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files![0];
-    setWorkbookName(file.name);
-    resetDatasourceIdx();
+    const workbookName = file.name;
+
+    // TODO: this logic should probably moved to the state code
     const stringPromise =
       file.type === "application/twbx" ? readWorkbookFromTwbx(file) : file.text();
     stringPromise.then((workbookString) => {
-      setWorkbookString(workbookString);
+      storeWorkbook(workbookName, workbookString);
+      resetDatasourceIdx();
+      setWorkbookName(file.name);
       setDrawerCollapsed(true);
     });
   }

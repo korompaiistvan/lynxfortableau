@@ -10,7 +10,6 @@ import { fitToWidth } from "./SVGSizingFunctions";
 
 // state
 import {
-  closedHeightState,
   columnWidthState,
   filteredLinksState,
   filteredNodesState,
@@ -26,7 +25,6 @@ function GraphCanvas() {
   const nodes = useRecoilValue(filteredNodesState);
   const margin = useRecoilValue(marginState);
   const nodeWidth = useRecoilValue(columnWidthState);
-  const nodeHeight = useRecoilValue(closedHeightState);
 
   const SVGRef = useRef<SVGSVGElement>(null);
   const [SVGBoundingBox, setSVGBoundingBox] = useState<DOMRect>();
@@ -53,20 +51,20 @@ function GraphCanvas() {
   });
 
   const nodeChildren = useMemo(() => {
-    return nodes?.map((col, idx) => {
+    return nodes?.map((col) => {
       return <ColumnNode {...col} key={`${workbookName}.${col.qualifiedName}`} />;
     });
   }, [workbookName, nodes]);
 
   const linkChildren = useMemo(() => {
-    return links.map((link, idx) => {
+    return links.map((link) => {
       return <NodeLink id={link.id} key={link.id} />;
     });
   }, [links]);
 
   useEffect(
     () => fitToWidth(SVGRef, setViewBox, margin, nodeWidth)(),
-    [nodes, links, margin, nodeWidth]
+    [workbookName, margin, nodeWidth]
   );
 
   return (

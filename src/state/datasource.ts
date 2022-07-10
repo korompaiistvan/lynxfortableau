@@ -30,17 +30,3 @@ export const selectedDatasourcesState = selector({
     }
   },
 });
-
-// export const selectedDatasourceState = selector<MappedDatasource | undefined>({
-//   key: "selectedDatasource",
-//   get: ({ get }) => {
-//     const datasourceIdx = get(selectedDatasourceIdxState);
-//     const workbook = get(workbookState);
-//     if (!workbook) return;
-
-//     if (datasourceIdx >= workbook.datasources.length) {
-//       return errorSelector(`datasourceIdx ${datasourceIdx} out of bounds`);
-//     }
-//     return workbook.datasources[datasourceIdx];
-//   },
-// });
