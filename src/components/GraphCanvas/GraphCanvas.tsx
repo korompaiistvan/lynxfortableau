@@ -6,9 +6,17 @@ import { useRecoilValue } from "recoil";
 import ColumnNode from "./ColumnNode";
 import { endPan, handlePan, handleZoom, startPan } from "./navigationEventHandlers";
 import NodeLink from "./NodeLink";
+import { fitToWidth } from "./SVGSizingFunctions";
 
 // state
-import { filteredLinksState, filteredNodesState, workbookNameState } from "src/state";
+import {
+  closedHeightState,
+  columnWidthState,
+  filteredLinksState,
+  filteredNodesState,
+  marginState,
+  workbookNameState,
+} from "src/state";
 
 // types
 import type { ViewBox } from "src/types";
@@ -16,6 +24,9 @@ import type { ViewBox } from "src/types";
 function GraphCanvas() {
   const links = useRecoilValue(filteredLinksState);
   const nodes = useRecoilValue(filteredNodesState);
+  const margin = useRecoilValue(marginState);
+  const nodeWidth = useRecoilValue(columnWidthState);
+  const nodeHeight = useRecoilValue(closedHeightState);
 
   const SVGRef = useRef<SVGSVGElement>(null);
   const [SVGBoundingBox, setSVGBoundingBox] = useState<DOMRect>();
@@ -52,9 +63,16 @@ function GraphCanvas() {
       return <NodeLink id={link.id} key={link.id} />;
     });
   }, [links]);
+
+  useEffect(
+    () => fitToWidth(SVGRef, setViewBox, margin, nodeWidth)(),
+    [nodes, links, margin, nodeWidth]
+  );
+
   return (
     <svg
       viewBox={viewBox.join(" ")}
+      // preserveAspectRatio="xMidYMin slice"
       width="100%"
       height="calc(100vh - 64px)"
       style={{ position: "relative", top: "56px" }}
