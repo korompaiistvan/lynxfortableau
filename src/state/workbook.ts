@@ -3,19 +3,18 @@ import { convertStringToMappedWorkbook } from "src/parser";
 
 // local / state
 import { atom, selector } from "recoil";
-import superstoreString from "../Superstore.twb";
 
 // types
 import type { MappedWorkbook } from "src/types";
 
 export const workbookStringState = atom<undefined | string>({
   key: "workbookString",
-  default: superstoreString,
+  default: undefined,
 });
 
-export const workbookNameState = atom<undefined | string>({
+export const workbookNameState = atom<string>({
   key: "workbookName",
-  default: "Sample - Superstore.twb",
+  default: undefined,
 });
 
 export const workbookState = selector<undefined | MappedWorkbook>({

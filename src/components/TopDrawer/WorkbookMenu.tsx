@@ -60,7 +60,7 @@ export default function WorkbookMenu(props: Props) {
               label="Workbook"
               variant="outlined"
               disabled
-              value={workbookName}
+              value={workbookName ?? ""}
               sx={{
                 flexGrow: 1,
                 color: (theme: Theme) => theme.palette.secondary.light,

@@ -5,11 +5,11 @@ import { workbookState } from "./workbook";
 // type
 import type { MappedColumn } from "../types";
 
-export const nodesStaticState = selector<MappedColumn[] | undefined>({
+export const nodesStaticState = selector<MappedColumn[]>({
   key: "nodesStatic",
   get: ({ get }) => {
     const workbook = get(workbookState);
-    if (!workbook) return;
+    if (!workbook) return [];
     const nodes: MappedColumn[] = workbook.datasources.map((d) => d.columns).flat();
     return nodes;
   },
