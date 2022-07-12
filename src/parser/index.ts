@@ -1,5 +1,5 @@
 export * from "./columnMap";
 export * from "./columnParse";
 export * from "./datasource";
-export { qualifiedNameFromDependency } from "./utils";
+export { qualifiedNameFromDependency, readWorkbookFromTwbx } from "./utils";
 export * from "./workbook";
