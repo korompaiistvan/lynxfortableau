@@ -1,19 +1,18 @@
 // external
 import { Box, Button, TextField, Theme } from "@mui/material";
-import { Dispatch, SetStateAction } from "react";
 
 // state
-import { useRecoilCallback, useRecoilState } from "recoil";
-import { currentWorkbookNameState, workbookUploadCallback } from "src/state";
+import { useRecoilCallback, useRecoilState, useSetRecoilState } from "recoil";
+import {
+  currentWorkbookNameState,
+  isTopDrawerCollapsedState,
+  workbookUploadCallback,
+} from "src/state";
 
-interface Props {
-  setDrawerCollapsed: Dispatch<SetStateAction<boolean>>;
-}
-
-export function WorkbookUploadInput(props: Props) {
+export function WorkbookUploadInput() {
   const [workbookName, setWorkbookName] = useRecoilState(currentWorkbookNameState);
   const uploadNewWorkbook = useRecoilCallback(workbookUploadCallback, []);
-  const { setDrawerCollapsed } = props;
+  const setDrawerCollapsed = useSetRecoilState(isTopDrawerCollapsedState);
 
   function handleWorkbookChange(event: React.ChangeEvent<HTMLInputElement>) {
     uploadNewWorkbook(event.target.files![0]);
