@@ -1,18 +1,16 @@
 // external
 import { ExpandMore } from "@mui/icons-material";
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
-import { Dispatch, SetStateAction } from "react";
+import { useRecoilState } from "recoil";
+import { isTopDrawerCollapsedState } from "src/state";
 
 // local
 import { DatasourceSelector } from "./DatasourceSelector";
 
-interface Props {
-  drawerCollapsed: boolean;
-  setDrawerCollapsed: Dispatch<SetStateAction<boolean>>;
-}
-export default function CommandBar(props: Props) {
-  const { drawerCollapsed, setDrawerCollapsed } = props;
+export default function CommandBar() {
+  const [drawerCollapsed, setDrawerCollapsed] = useRecoilState(isTopDrawerCollapsedState);
   const appBarElevation = drawerCollapsed ? 16 : 0;
+
   function handleCollapseChange() {
     setDrawerCollapsed((prev) => !prev);
   }

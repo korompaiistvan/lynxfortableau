@@ -1,7 +1,8 @@
 // external
-import { Collapse } from "@mui/material";
+import { Collapse, Container } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { Dispatch, SetStateAction } from "react";
+import { useRecoilValue } from "recoil";
+import { isTopDrawerCollapsedState } from "src/state";
 import { darkTheme } from "src/theme";
 
 //local
@@ -10,19 +11,26 @@ import { WorkbookUploadInput } from "./WorkbookUploadInput";
 
 // state
 
-interface Props {
-  drawerCollapsed: boolean;
-  setDrawerCollapsed: Dispatch<SetStateAction<boolean>>;
-}
-
-export default function WorkbookMenu(props: Props) {
-  const { drawerCollapsed, setDrawerCollapsed } = props;
+export default function WorkbookMenu() {
+  const drawerCollapsed = useRecoilValue(isTopDrawerCollapsedState);
 
   return (
     <Collapse in={!drawerCollapsed}>
       <ThemeProvider theme={darkTheme}>
-        <WorkbookUploadInput setDrawerCollapsed={setDrawerCollapsed} />
-        <WorkbookList setDrawerCollapsed={setDrawerCollapsed} />
+        <Container
+          sx={{
+            height: "calc(100vh - 64px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "20px",
+          }}
+          maxWidth="sm"
+        >
+          <WorkbookUploadInput />
+          <WorkbookList />
+        </Container>
       </ThemeProvider>
     </Collapse>
   );

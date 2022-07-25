@@ -1,23 +1,28 @@
 // external
 import ArticleIcon from "@mui/icons-material/Article";
-import { ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { Dispatch, SetStateAction } from "react";
+import { ListItem, ListItemButton, ListItemIcon, ListItemText, Theme } from "@mui/material";
 import { useSetRecoilState } from "recoil";
-import { workbookNameState } from "src/state";
+import { currentWorkbookNameState, isTopDrawerCollapsedState } from "src/state";
 
 interface Props {
   workbookName: string;
-  setDrawerCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 export default function WorkbookListItem(props: Props) {
-  const { workbookName, setDrawerCollapsed } = props;
-  const setWorkbookName = useSetRecoilState(workbookNameState);
-  function clickHandler() {
-    setWorkbookName(workbookName);
+  const { workbookName } = props;
+  const setDrawerCollapsed = useSetRecoilState(isTopDrawerCollapsedState);
+  const setWorkbookName = useSetRecoilState(currentWorkbookNameState);
+  async function clickHandler() {
     setDrawerCollapsed(true);
+    setWorkbookName(workbookName);
   }
   return (
-    <ListItem disablePadding onClick={clickHandler}>
+    <ListItem
+      disablePadding
+      onClick={clickHandler}
+      sx={{
+        color: (theme: Theme) => theme.palette.secondary.light,
+      }}
+    >
       <ListItemButton>
         <ListItemIcon>
           <ArticleIcon />

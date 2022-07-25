@@ -11,10 +11,10 @@ import { fitToWidth } from "./SVGSizingFunctions";
 // state
 import {
   columnWidthState,
+  currentWorkbookNameState,
   filteredLinksState,
   filteredNodesState,
   marginState,
-  workbookNameState,
 } from "src/state";
 
 // types
@@ -31,7 +31,7 @@ function GraphCanvas() {
   const [viewBox, setViewBox] = useState<ViewBox>([0, 0, 4000, 2000]);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [pointerOrigin, setPointerOrigin] = useState<DOMPoint>();
-  const workbookName = useRecoilValue(workbookNameState);
+  const workbookName = useRecoilValue(currentWorkbookNameState);
 
   // holds the timer for setTimeout and clearInterval
   let movement_timer: NodeJS.Timeout | undefined = undefined;

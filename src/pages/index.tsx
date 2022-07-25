@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { RecoilRoot } from "recoil";
 
 import dynamic from "next/dynamic";
@@ -9,8 +9,10 @@ function Main() {
   return (
     <RecoilRoot>
       <StrictMode>
-        <GraphCanvas />
-        <TopDrawer />
+        <Suspense fallback={<div>Loading...</div>}>
+          <GraphCanvas />
+          <TopDrawer />
+        </Suspense>
       </StrictMode>
     </RecoilRoot>
   );

@@ -7,4 +7,6 @@ export * from "./nodeData";
 export * from "./nodeDisplay";
 // rendering
 export * from "./renderingSettings";
+// ui
+export * from "./ui";
 export * from "./workbook";
